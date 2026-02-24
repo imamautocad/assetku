@@ -1,0 +1,244 @@
+.spinner {
+  width: 60px;
+  height: 60px;
+  position: relative;
+}
+
+.spinner:before,
+.spinner:after {
+  content: "";
+  position: absolute;
+  top: 25px;
+  width: 12px;
+  height: 12px;
+  background: #007bff;
+  border-radius: 50%;
+  animation: bounce 0.6s infinite alternate;
+}
+
+.spinner:after {
+  left: 30px;
+  animation-delay: 0.3s;
+}
+
+@keyframes bounce {
+  to {
+    transform: translateY(-15px);
+    opacity: 0.5;
+  }
+}
+/* ===============================
+   CUSTOM PRINT BUTTON
+   =============================== */
+.btn-print-custom {
+    background: #32bd55 !important;
+    border-color: #32bd55 !important;
+    color: #fff !important;
+
+    /* spacing & alignment */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;   /* JARAK SAMA SEPERTI BUTTON LAIN */
+    padding: 8px 9.5px;    /* SAMAKAN DENGAN btn-sm */
+    line-height: 1;
+}
+.btn-print-custom-broken {
+    background: #ff0000 !important;
+    border-color: #ff0000 !important;
+    color: #fff !important;
+
+    /* spacing & alignment */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;   /* JARAK SAMA SEPERTI BUTTON LAIN */
+    padding: 8px 9.5px;    /* SAMAKAN DENGAN btn-sm */
+    line-height: 1;
+}
+
+/* hover */
+.btn-print-custom:hover {
+    background: #32bd55 !important;
+    border-color: #32bd55 !important;
+}
+
+/* focus & active */
+.btn-print-custom:focus,
+.btn-print-custom:active {
+    background-color: #32bd55 !important;
+    border-color: #32bd55 !important;
+    box-shadow: none !important;
+}
+
+/* icon */
+.btn-print-custom i {
+    color: #ffffff;
+    font-size: 13px;   /* SAMA DENGAN ICON ACTION LAIN */
+}
+
+/* ===============================
+   CUSTOM PRINT BUTTON
+   =============================== */
+.btn-print-balik {
+    background: #aa4ee0 !important;
+    border-color: #aa4ee0 !important;
+    color: #fff !important;
+
+    /* spacing & alignment */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;   /* JARAK SAMA SEPERTI BUTTON LAIN */
+    padding: 8px 9.5px;    /* SAMAKAN DENGAN btn-sm */
+    line-height: 1;
+}
+
+/* hover */
+.btn-print-balik:hover {
+    background: #aa4ee0 !important;
+    border-color: #aa4ee0 !important;
+}
+
+/* focus & active */
+.btn-print-balik:focus,
+.btn-print-balik:active {
+    background-color: #aa4ee0 !important;
+    border-color: #aa4ee0 !important;
+    box-shadow: none !important;
+}
+
+/* icon */
+.btn-print-balik i {
+    color: #ffffff;
+    font-size: 13px;   /* SAMA DENGAN ICON ACTION LAIN */
+}
+
+/* ===============================
+   DASHBOARD FLEX – FINAL FIX
+   (SNIPE-IT / ADMINLTE)
+   =============================== */
+
+/* CONTAINER */
+.flex-dashboard {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px;
+    width: 100%;
+}
+
+/* ITEM WRAPPER */
+.flex-dashboard > div {
+    float: none !important;          /* matikan grid lama */
+    flex: 1 1 25%;
+    max-width: 25%;
+}
+
+/* WAJIB: LINK JADI BLOCK */
+.flex-dashboard > div > a {
+    display: block !important;
+    width: 100% !important;
+}
+
+/* CARD */
+.flex-dashboard .dashboard.small-box {
+    float: none !important;          /* matikan AdminLTE */
+    width: 100% !important;
+    height: 100%;
+    min-height: 120px;
+    border-radius: 14px;
+}
+
+/* ===============================
+   TABLET
+   =============================== */
+@media (max-width: 1024px) {
+    .flex-dashboard > div {
+        flex: 1 1 33.333%;
+        max-width: 33.333%;
+    }
+}
+/* ===============================
+   DASHBOARD FLEX – FINAL FIX
+   (SNIPE-IT / ADMINLTE)
+   =============================== */
+
+/* CONTAINER */
+.flex-dashboard {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100%;
+    gap: 12px;
+}
+
+/* ITEM */
+.flex-dashboard > div {
+    float: none !important;
+    width: 25%;
+}
+
+/* LINK */
+.flex-dashboard > div > a {
+    display: block !important;
+    width: 100% !important;
+}
+
+/* CARD */
+.flex-dashboard .small-box {
+    float: none !important;
+    display: block !important;
+    width: 100% !important;
+    min-height: 120px;
+    border-radius: 14px;
+}
+
+/* ===============================
+   TABLET
+   =============================== */
+@media (max-width: 1024px) {
+    .flex-dashboard > div {
+        width: 33.333%;
+    }
+}
+
+/* ===============================
+   MOBILE – PAKSA 1 KOLOM (INI KUNCI)
+   =============================== */
+@media (max-width: 768px) {
+
+    /* 1. Container */
+    .flex-dashboard {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* 2. Wrapper */
+    .flex-dashboard > div {
+        display: block !important;
+        width: 100% !important;
+        clear: both !important;
+    }
+
+    /* 3. Link harus block */
+    .flex-dashboard > div > a {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* 4. Small box harus normal flow */
+    .flex-dashboard .small-box {
+        display: block !important;
+        width: 100% !important;
+        float: none !important;
+        position: relative !important;
+        margin-bottom: 14px !important;
+    }
+
+    /* 5. Matikan absolute positioning icon */
+    .flex-dashboard .small-box .icon {
+        position: absolute !important;
+        right: 12px;
+        top: 12px;
+        opacity: 0.25;
+    }
+}

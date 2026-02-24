@@ -43,16 +43,31 @@ class InventoryAlert extends Notification
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail()
-    {
-        $message = (new MailMessage)->markdown(
-            'notifications.markdown.report-low-inventory',
-            [
-                'items'  => $this->items,
-                'threshold'  => $this->threshold,
-            ]
-        )
-            ->subject(trans('mail.Low_Inventory_Report'));
+    // {
+    //     $message = (new MailMessage)->markdown(
+    //         'notifications.markdown.report-low-inventory',
+    //         [
+    //             'items'  => $this->items,
+    //             'threshold'  => $this->threshold,
+    //         ]
+    //     )
+    //         ->subject(trans('mail.Low_Inventory_Report'));
 
-        return $message;
+    //     return $message;
+    // }
+        {
+        $emails = array_map('trim', explode(',', env('LOW_INVENTORY_EMAILS')));
+
+        return (new MailMessage)
+           // ->to($emails)
+            ->subject(trans('mail.Low_Inventory_Report'))
+            ->markdown(
+                'notifications.markdown.report-low-inventory',
+                [
+                    'items'     => $this->items,
+                    'threshold' => $this->threshold,
+                ]
+            );
     }
 }
+ 

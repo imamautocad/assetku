@@ -83,6 +83,7 @@ class Asset extends Depreciable
         'last_checkout' => 'datetime',
         'last_checkin' => 'datetime',
         'expected_checkin' => 'datetime:m-d-Y',
+        'broken_date' =>'date',
         'last_audit_date' => 'datetime',
         'next_audit_date' => 'datetime:m-d-Y',
         'model_id'       => 'integer',
@@ -112,6 +113,8 @@ class Asset extends Depreciable
         'rtd_location_id'   => ['nullable', 'exists:locations,id', 'fmcs_location'],
         'purchase_date'     => ['nullable', 'date', 'date_format:Y-m-d'],
         'serial'            => ['nullable', 'unique_undeleted:assets,serial'],
+        'cpu'               => ['nullable','max:255'],
+        'ram'               => ['nullable','max:255'],
         'purchase_cost'     => ['nullable', 'numeric', 'gte:0', 'max:9999999999999'],
         'supplier_id'       => ['nullable', 'exists:suppliers,id'],
         'asset_eol_date'    => ['nullable', 'date'],
@@ -148,6 +151,8 @@ class Asset extends Depreciable
         'purchase_date',
         'rtd_location_id',
         'serial',
+        'cpu',
+        'ram',
         'status_id',
         'supplier_id',
         'warranty_months',
@@ -175,6 +180,8 @@ class Asset extends Depreciable
       'name',
       'asset_tag',
       'serial',
+      'cpu',
+      'ram',
       'order_number',
       'purchase_cost',
       'notes',
@@ -1120,6 +1127,7 @@ class Asset extends Depreciable
         /**
          * Assigned user
          */
+        
         $query = $query->leftJoin('users as assets_users', function ($leftJoin) {
             $leftJoin->on('assets_users.id', '=', 'assets.assigned_to')
                 ->where('assets.assigned_type', '=', User::class);
@@ -1603,7 +1611,7 @@ class Asset extends Depreciable
                     ->orWhere('assets.notes', 'LIKE', '%'.$search.'%');
             }
 
-        })->withTrashed()->whereNull('assets.deleted_at'); //workaround for laravel bug
+        });
     }
 
     /**
@@ -1637,7 +1645,7 @@ class Asset extends Depreciable
      * @return \Illuminate\Database\Query\Builder          Modified query builder
      */
     public function scopeByFilter($query, $filter)
-    {
+    {       
         return $query->where(function ($query) use ($filter) {
             foreach ($filter as $key => $search_val) {
 

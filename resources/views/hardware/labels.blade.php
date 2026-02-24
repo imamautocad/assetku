@@ -2,11 +2,10 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Labels</title>
+    <title>Print Labels</title>
 
 </head>
 <body>
-
 <?php
 $settings->labels_width = $settings->labels_width - $settings->labels_display_sgutter;
 $settings->labels_height = $settings->labels_height - $settings->labels_display_bgutter;

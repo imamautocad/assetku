@@ -31,6 +31,7 @@ use League\Csv\EscapeFormula;
 use App\Http\Requests\CustomAssetReportRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 
 /**
  * This controller handles all actions related to Reports for
@@ -103,6 +104,15 @@ class ReportsController extends Controller
         $response->header('Content-disposition', 'attachment;filename=report.csv');
 
         return $response;
+    }
+
+/**Penambahan Detail Report*/
+  public function getDetailReport()
+    {
+        $this->authorize('reports.view');
+        $ReportDetail = DB::table('v_detail_asset')->get();
+
+        return view('reports/report_detail', compact('ReportDetail'));
     }
 
     /**
@@ -477,15 +487,20 @@ class ReportsController extends Controller
             if ($request->filled('manufacturer')) {
                 $header[] = trans('admin/hardware/form.manufacturer');
             }
-
             if ($request->filled('serial')) {
                 $header[] = trans('admin/hardware/table.serial');
+            }
+              if ($request->filled('cpu')) {
+                $header[] = trans('admin/hardware/form.cpu');
+            }
+            if ($request->filled('ram')) {
+                $header[] = trans('admin/hardware/form.ram');
             }
             if ($request->filled('purchase_date')) {
                 $header[] = trans('admin/hardware/table.purchase_date');
             }
 
-            if ($request->filled('purchase_cost')) {
+            if ($request->filled('purchase_cost')) { 
                 $header[] = trans('admin/hardware/table.purchase_cost');
             }
 
@@ -796,6 +811,12 @@ class ReportsController extends Controller
 
                     if ($request->filled('serial')) {
                         $row[] = ($asset->serial) ? $asset->serial : '';
+                    }
+                     if ($request->filled('cpu')) {
+                        $row[] = ($asset->cpu) ? $asset->cpu : '';
+                    }
+                     if ($request->filled('ram')) {
+                        $row[] = ($asset->ram) ? $asset->ram : '';
                     }
 
                     if ($request->filled('purchase_date')) {

@@ -336,8 +336,17 @@ class LoginController extends Controller
             $user->saveQuietly();
         }
         // Redirect to the users page
-        return redirect()->intended()->with('success', trans('auth/message.signin.success'));
-    }
+        // return redirect()->intended()->with('success', trans('auth/message.signin.success'));
+        $user = auth()->user();
+
+        if ($user->hasAccess('reports.view')) {
+            return redirect('/')
+                ->with('success', trans('auth/message.signin.success'));
+        }
+
+        return redirect()->intended('/')
+            ->with('success', trans('auth/message.signin.success'));
+            }
 
 
     /**

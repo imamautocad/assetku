@@ -215,15 +215,31 @@ class LocationsController extends Controller
     public function show(Location $location) : View | RedirectResponse
     {
         $this->authorize('view', Location::class);
+        
+        // $location = Location::withCount('assignedAssets as assigned_assets_count')
+        //     ->withCount('assets as assets_count')
+        //     ->withCount('rtd_assets as rtd_assets_count')
+        //     ->withCount('children as children_count')
+        //     ->withCount('users as users_count')
+        //     ->withTrashed()
+        //     ->find($location->id);
+        $location = Location::withCount([
+        'assets as assets_count' => function ($q) {
+            $q->whereNull('assets.deleted_at');
+        },
+        'assignedAssets as assigned_assets_count' => function ($q) {
+            $q->whereNull('assets.deleted_at');
+        },
+        'rtd_assets as rtd_assets_count' => function ($q) {
+            $q->whereNull('assets.deleted_at');
+        },
+        'children as children_count',
+        'users as users_count',
+        ])
+        //->withTrashed()
+        ->find($location->id);
 
-        $location = Location::withCount('assignedAssets as assigned_assets_count')
-            ->withCount('assets as assets_count')
-            ->withCount('rtd_assets as rtd_assets_count')
-            ->withCount('children as children_count')
-            ->withCount('users as users_count')
-            ->withTrashed()
-            ->find($location->id);
-
+        // dd($location);
         if (isset($location->id)) {
             return view('locations/view', compact('location'));
         }

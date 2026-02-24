@@ -44,6 +44,8 @@ return [
     'redirect_to_checked_out_to'   => 'Go to Checked Out to',
     'select_statustype'	=> 'Pilih Jenis Status',
     'serial'			=> 'Serial',
+    'cpu'			=> 'CPU',
+    'ram'			=> 'RAM',	
     'status'			=> 'Status',
     'tag'				=> 'Tag Aset',
     'update'			=> 'Perbarui aset',

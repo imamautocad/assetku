@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Api;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Api\ConsumableReportApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -1364,6 +1364,14 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'getLabels'
         ])->name('api.assets.labels');
         // end generate label routes
-
-
+//
+// Route::get('/consumable/orders', [\App\Http\Controllers\Api\ConsumableOrderApiController::class, 'index'])
+//     ->name('api.consumable.orders.index');
+// Route::middleware('auth')->get('/consumable/orders', [\App\Http\Controllers\Api\ConsumableOrderApiController::class, 'index'])
+//     ->name('api.consumable.orders.index');
 }); // end API routes
+
+// Route::middleware('auth:api')->group(function () {
+//     Route::get('/reports/consumables', [ConsumableReportApiController::class, 'index'])
+//         ->name('api.reports.consumables');
+// });

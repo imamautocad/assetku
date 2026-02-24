@@ -392,8 +392,30 @@
                                       </p>
                                   </div>
                               </div>
-
-
+                              <!-- IFCA User -->
+                              <div class="form-group {{ $errors->has('ifca') ? 'has-error' : '' }}">
+                                  <label class="col-md-3 control-label" for="ifca">{{ trans('admin/users/table.ifca') }}</label>
+                                  <div class="col-md-6">
+                                      <input class="form-control" type="text" name="ifca" id="ifca" value="{{ old('ifca', $user->ifca_user) }}" maxlength="25" />
+                                      {!! $errors->first('ifca', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                  </div>
+                              </div>
+                              <!-- VPN User -->
+                              <div class="form-group {{ $errors->has('vpn') ? 'has-error' : '' }}">
+                                  <label class="col-md-3 control-label" for="vpn">{{ trans('admin/users/table.vpn') }}</label>
+                                  <div class="col-md-6">
+                                      <input class="form-control" type="text" name="vpn" id="vpn" value="{{ old('vpn', $user->vpn_user) }}" maxlength="25" />
+                                      {!! $errors->first('vpn', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                  </div>
+                              </div>
+                              <!-- Intranet -->
+                              <div class="form-group {{ $errors->has('intranet') ? 'has-error' : '' }}">
+                                  <label class="col-md-3 control-label" for="intranet">{{ trans('admin/users/table.intranet') }}</label>
+                                  <div class="col-md-6">
+                                      <input class="form-control" type="text" name="intranet" id="intranet" value="{{ old('intranet', $user->intranet_user) }}" maxlength="50" />
+                                      {!! $errors->first('intranet', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                  </div>
+                              </div>
                               <!-- Location -->
                               @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'location_id'])
 

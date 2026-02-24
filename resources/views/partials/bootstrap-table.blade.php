@@ -2,6 +2,10 @@
     <link rel="stylesheet" href="{{ url(mix('css/dist/bootstrap-table.css')) }}">
 @endpush
 
+@push('css')
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+@endpush
+
 @push('js')
 
 <script src="{{ url(mix('js/dist/bootstrap-table.js')) }}"></script>
@@ -367,9 +371,9 @@
                 dest = dest + '/' + row.owner_id + '/' + element_name;
             }
 
-            if ((row.available_actions) && (row.available_actions.clone === true)) {
-                actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/clone" class="actions btn btn-sm btn-info" data-tooltip="true" title="{{ trans('general.clone_item') }}"><x-icon type="clone" /><span class="sr-only">{{ trans('general.clone_item') }}</span></a>&nbsp;';
-            }
+            // if ((row.available_actions) && (row.available_actions.clone === true)) {
+            //     actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/clone" class="actions btn btn-sm btn-info" data-tooltip="true" title="{{ trans('general.clone_item') }}"><x-icon type="clone" /><span class="sr-only">{{ trans('general.clone_item') }}</span></a>&nbsp;';
+            // }
 
             if ((row.available_actions) && (row.available_actions.audit === true)) {
                 actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/audit" class="actions btn btn-sm btn-primary" data-tooltip="true" title="{{ trans('general.audit') }}"><x-icon type="audit" /><span class="sr-only">{{ trans('general.audit') }}</span></a>&nbsp;';
@@ -395,8 +399,6 @@
                     var name_for_box = row.asset_tag
                 }
 
-
-                
                 actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '" '
                     + ' class="actions btn btn-danger btn-sm delete-asset" data-tooltip="true"  '
                     + ' data-toggle="modal" '
@@ -410,8 +412,52 @@
                 }
 
             }
+            
+            // ===============================
+            // PRINT SERAH TERIMA (CHECKOUT)
+            // ===============================
+            if (row.assigned_to) {
+                actions += '<a href="{{ config('app.url') }}/hardware/' + row.id + '/print-serah-terima" '
+                    + 'class="actions btn btn-sm btn-print-custom" '
+                    + 'target="_blank" '
+                    + 'data-tooltip="true" '
+                    + 'title="Print Berita Acara Serah Terima">'
+                    + '<i class="fa fa-print"></i>'
+                    + '<span class="sr-only">Print Serah Terima</span>'
+                    + '</a>&nbsp;';
+            }
 
+            // ===============================
+            // PRINT PENGEMBALIAN (CHECKIN)
+            // ===============================
+           if (
+                row.status_label &&
+                row.status_label.name === 'IT-Stock' &&
+                !row.assigned_to
+            ) {
+                actions += '<a href="{{ config('app.url') }}/assets/bast/pengembalian/' 
+                    + row.id + '" '
+                    + 'class="actions btn btn-sm btn-print-balik" '
+                    + 'target="_blank" '
+                    + 'title="Print Berita Acara Pengembalian">'
+                    + '<i class="fa fa-print"></i>'
+                    + '</a>&nbsp;';
+            }
 
+            // ===============================
+            // PRINT Broken (Rusak)
+            // ===============================
+           if (row.status_label && row.status_label.id == 4) { 
+                actions += '<a href="{{ config('app.url') }}/hardware/' + row.id + '/print-serah-broken" '
+                    + 'class="actions btn btn-sm btn-print-custom-broken" '
+                    + 'target="_blank" '
+                    + 'data-tooltip="true" '
+                    + 'title="Print Berita Acara Broken">'
+                    + '<i class="fa fa-print"></i>'
+                    + '<span class="sr-only">Print BAST Broken</span>'
+                    + '</a>&nbsp;';
+            }
+            
             if ((row.available_actions) && (row.available_actions.restore === true)) {
                 actions += '<form style="display: inline;" method="POST" action="{{ config('app.url') }}/' + dest + '/' + row.id + '/restore"> ';
                 actions += '@csrf';
@@ -435,19 +481,19 @@
 
             if (value.type == 'asset') {
                 item_destination = 'hardware';
-                item_icon = 'fas fa-barcode';
+                item_icon = 'bi bi-qr-code';
             } else if (value.type == 'accessory') {
                 item_destination = 'accessories';
-                item_icon = 'far fa-keyboard';
+                item_icon = 'bi bi-mouse2-fill';
             } else if (value.type == 'component') {
                 item_destination = 'components';
-                item_icon = 'far fa-hdd';
+                item_icon = 'bi bi-device-hdd-fiill';
             } else if (value.type == 'consumable') {
                 item_destination = 'consumables';
-                item_icon = 'fas fa-tint';
+                item_icon = 'bi bi-droplet-fill';
             } else if (value.type == 'license') {
                 item_destination = 'licenses';
-                item_icon = 'far fa-save';
+                item_icon = 'bi bi-file-text-fill';
             } else if (value.type == 'user') {
                 item_destination = 'users';
                 item_icon = 'fas fa-user';

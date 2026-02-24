@@ -66,13 +66,15 @@
                           </a>
                       </li>
                   @endif
-
-                  @if ($location->assignedAssets()->AssetsForShow()->count() > 0)
+                
+                  {{-- @if ($location->assignedAssets()->AssetsForShow()->count() > 0) --}}
+                  @if($location->assigned_assets > 0) {{-- perubahan di lakukan untuk membaca ke controller bukan ke model--}}
                       <li>
                           <a href="#assets_assigned" data-toggle="tab" data-tooltip="true" title="{{ trans('admin/locations/message.assigned_assets') }}">
                               <i class="fas fa-barcode" style="font-size: 17px" aria-hidden="true"></i>
                               <span class="badge">
-                          {{ number_format($location->assignedAssets()->AssetsForShow()->count()) }}
+                          {{-- {{ number_format($location->assignedAssets()->AssetsForShow()->count()) }} --}}
+                          {{ number_format($location->assigned_assets_count) }}
                       </span>
                               <span class="sr-only">
                           {{ trans('admin/locations/message.assigned_assets') }}
@@ -83,6 +85,7 @@
               @endcan
 
                   @can('view', \App\Models\Accessory::class)
+                  @if(auth()->user()->is_superuser || auth()->user()->department->id == '3')
                       @if ($location->accessories->count() > 0)
                           <li>
                               <a href="#accessories" data-toggle="tab" data-tooltip="true" title="{{ trans('general.accessories') }}">
@@ -109,6 +112,7 @@
                                   </span>
                               </a>
                           </li>
+                  @endif
                       @endif
                   @endcan
 
@@ -130,6 +134,7 @@
                   @endcan
 
                   @can('view', \App\Models\Component::class)
+                  @if(auth()->user()->is_superuser || auth()->user()->department->id == '3')
                       @if ($location->components->count() > 0)
                           <li>
                               <a href="#components" data-toggle="tab" data-tooltip="true" title="{{ trans('general.components') }}">
@@ -142,6 +147,7 @@
                                   </span>
                               </a>
                           </li>
+                  @endif       
                       @endif
                   @endcan
 
@@ -181,10 +187,11 @@
 
 
           <div class="tab-content">
-              @can('view', \App\Models\User::class)
+              {{-- @can('view', \App\Models\User::class) --}}
                     <div id="users" @class(['tab-pane','active' => $location->users->count() > 0 ]) >
-              @endcan
+              {{-- @endcan --}}
                   <h2 class="box-title">{{ trans('general.users') }}</h2>
+                  @can('view', \App\Models\User::class)
                       @include('partials.users-bulk-actions')
                       <table
                               data-columns="{{ \App\Presenters\UserPresenter::dataTableLayout() }}"
@@ -212,6 +219,11 @@
                               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                               }'>
                       </table>
+                       @else
+                        <div class="alert alert-secondary">
+                            You do not have permission to view users.
+                        </div>
+                    @endcan
                     </div><!-- /.tab-pane -->
                 <div id="assets" @class(['tab-pane', 'active' => $location->users->count() == 0]) >
 
@@ -491,7 +503,6 @@
                         </div>
                     </div> <!-- /.row -->
                 </div> <!-- /.tab-pane history -->
-
           </div><!--/.col-md-9-->
       </div><!--/.col-md-9-->
   </div><!--/.col-md-9-->

@@ -43,7 +43,17 @@
                     </a>                   
                 </li>
                 @endif
-            </ul>
+            
+@if ($consumables->count() > 0)
+<li>
+    <a href="#consumables" data-toggle="tab" title="{{ trans('general.consumables') }}">
+        {{ trans('general.consumables') }}
+        <badge class="badge badge-secondary"> {{ $consumables->count()}}</badge>
+    </a>
+</li>
+@endif
+
+</ul>
             <div class="tab-content">
                 @if ($assets->count() > 0)
                 <div class="tab-pane fade in active" id="assets">
@@ -79,6 +89,8 @@
                                                 <th class="col-md-2" data-field="model" data-sortable="true">{{ trans('admin/hardware/table.asset_model') }}</th>
                                                 <th class="col-md-2" data-field="model_number" data-sortable="true">{{ trans('admin/models/table.modelnumber') }}</th>
                                                 <th class="col-md-2" data-field="name" data-sortable="true">{{ trans('admin/hardware/form.name') }}</th>
+                                                <th class="col-md-3" data-field="cpu" data-sortable="true">{{ trans('admin/hardware/table.cpu') }}</th>
+                                                <th class="col-md-3" data-field="ram" data-sortable="true">{{ trans('admin/hardware/table.ram') }}</th>
                                                 <th class="col-md-3" data-field="serial" data-sortable="true">{{ trans('admin/hardware/table.serial') }}</th>
                                                 <th class="col-md-2" data-field="location" data-sortable="true">{{ trans('admin/hardware/table.location') }}</th>
                                                 <th class="col-md-2" data-field="status" data-sortable="true">{{ trans('admin/hardware/table.status') }}</th>
@@ -170,8 +182,69 @@
                 </div>
                 @endif
 
-            </div> <!-- .tab-content-->
-        </div> <!-- .nav-tabs-custom -->
+            
+@if ($consumables->count() > 0)
+<div class="tab-pane fade in" id="consumables">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="table-responsive">
+                <table
+                    data-search="true"
+                    data-pagination="true"
+                    data-show-columns="true"
+                    data-show-export="false"
+                    data-show-refresh="true"
+                    data-sort-order="asc"
+                    data-toolbar="#consumablesToolbar"
+                    class="table table-striped snipe-table"
+                    id="consumablesListingTable">
+                    <thead>
+                        <tr>
+                            <th data-field="image">{{ trans('general.image') }}</th>
+                            <th data-field="name">{{ trans('admin/consumables/table.title') }}</th>
+                            <th data-field="category">{{ trans('general.category') }}</th>
+                            <th data-field="location">{{ trans('general.location') }}</th>
+                            <th data-field="qty">{{ trans('general.quantity') }}</th>
+                            <th data-field="actions">{{ trans('table.actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($consumables as $item)
+                        <tr>
+                            <td>
+                                @if ($item->image)
+                                    <img src="{{ config('app.url') }}/uploads/consumables/{{ $item->image }}" width="50">
+                                @endif
+                            </td>
+                            <td>{{ $item->name }}</td>
+                            <td>{{ $item->category->name ?? '-' }}</td>
+                            <td>{{ $item->location->name ?? '-' }}</td>
+                            <td>{{ $item->qty }}</td>
+                            
+{{-- <td>
+    <form method="POST" action="{{ route('consumables.request', $item->id) }}">
+        @csrf
+        <button type="submit" class="btn btn-sm btn-primary">{{ trans('general.request') }}</button>
+    </form>
+    <form method="GET" action="{{ route('consumables.checkout', ['consumable' => $item->id]) }}">
+        <button type="submit" class="btn btn-sm btn-success">{{ trans('button.checkout') }}</button>
+    </form>
+</td> --}}
+
+
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
+</div> <!-- .tab-content-->
+        </div>
+         <!-- .nav-tabs-custom -->
 
         @endif
     </div> <!-- .col-md-12> -->

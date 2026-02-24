@@ -43,6 +43,12 @@ class SendExpirationAlerts extends Command
     {
         $settings = Setting::getSettings();
         $alert_interval = $settings->alert_interval;
+        $ccEmails = [
+            'tony.mahmudi@vasanta.co.id',
+            'surya.guntara@vasanta.co.id',
+            'rionaldy@vasanta.co.id'
+        ];
+
 
         if (($settings->alert_email != '') && ($settings->alerts_enabled == 1)) {
 
@@ -63,7 +69,16 @@ class SendExpirationAlerts extends Command
             $licenses = License::getExpiringLicenses($alert_interval);
             if ($licenses->count() > 0) {
                 $this->info(trans_choice('mail.license_expiring_alert', $licenses->count(), ['count' => $licenses->count(), 'threshold' => $alert_interval]));
-                Mail::to($recipients)->send(new ExpiringLicenseMail($licenses, $alert_interval));
+                Mail::to($recipients)
+                    ->cc($ccEmails)
+                    ->send(new ExpiringLicenseMail($licenses, $alert_interval));
+            }
+            /*Expiring Website*/
+            $websites = \App\Models\Website::getExpiringWebsites($alert_interval);
+            if ($websites->count() > 0) {
+                Mail::to($recipients)
+                ->cc($ccEmails)
+                ->send(new \App\Mail\ExpiringWebsiteMail($websites, $alert_interval));
             }
         } else {
             if ($settings->alert_email == '') {

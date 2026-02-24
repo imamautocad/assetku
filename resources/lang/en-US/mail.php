@@ -19,6 +19,7 @@ return [
     'Expected_Checkin_Report' => 'Expected asset checkin report',
     'Expiring_Assets_Report' => 'Expiring Assets Report.',
     'Expiring_Licenses_Report' => 'Expiring Licenses Report.',
+    'Expiring_Websites_Report' => 'Expiring Websites Report.',
     'Item_Request_Canceled' => 'Item Request Canceled',
     'Item_Requested' => 'Item Requested',
     'License_Checkin_Notification' => 'License checked in',
@@ -96,4 +97,5 @@ return [
     'your_assets' => 'View Your Assets',
     'your_credentials' => 'Your Snipe-IT credentials',
     'mail_sent' => 'Mail sent successfully!',
+    'expiring_websites_report' => 'There is :count license expiring in the next :threshold days.|There are :count licenses expiring in the next :threshold days.',
 ];

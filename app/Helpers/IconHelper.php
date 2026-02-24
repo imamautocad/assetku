@@ -34,7 +34,7 @@ class IconHelper
             case 'user':
                 return 'fa-solid fa-user';
             case 'users':
-                return 'fas fa-users';
+                return 'bi bi-person-fill-gear';
             case 'restore':
                 return 'fa-solid fa-trash-arrow-up';
             case 'external-link':
@@ -56,7 +56,7 @@ class IconHelper
             case 'admin-settings':
                 return 'fas fa-cogs';
             case 'settings':
-                return 'fas fa-cog';
+                return 'bi bi-gear-fill';
             case 'angle-left':
                 return 'fas fa-angle-left';
             case 'angle-right':
@@ -64,22 +64,26 @@ class IconHelper
             case 'warning':
                 return 'fas fa-exclamation-triangle';
             case 'kits':
-                return 'fas fa-object-group';
+                return 'bi bi-bounding-box';
             case 'assets':
+                return 'bi bi-qr-code';
             case 'asset':
-                return 'fas fa-barcode';
+                return 'bi bi-qr-code';
             case 'accessories':
             case 'accessory':
-                return 'far fa-keyboard';
+                return 'bi bi-mouse2';
             case 'components':
+                return 'bi bi-device-hdd';
             case 'component':
-                return 'far fa-hdd';
+                return 'bi bi-device-hdd';
             case 'consumables':
+                return 'bi bi-droplet';
             case 'consumable':
-                return 'fas fa-tint';
+                return 'bi bi-droplet';
             case 'licenses':
+                return 'bi bi-file-text';
             case 'license':
-                return 'far fa-save';
+                return 'bi bi-file-text';
             case 'requestable':
                 return 'fas fa-laptop';
             case 'reports':
@@ -93,11 +97,11 @@ class IconHelper
             case 'due':
                 return 'fas fa-history';
             case 'import':
-                return 'fas fa-cloud-upload-alt';
+                return 'bi bi-cloud-arrow-up';
             case 'search':
                 return 'fas fa-search';
             case 'alerts':
-                return 'far fa-flag';
+                return 'bi bi-bell-fill';
             case 'password':
                 return 'fa-solid fa-key';
             case 'api-key':
@@ -105,7 +109,7 @@ class IconHelper
             case 'nav-toggle':
                 return 'fas fa-bars';
             case 'dashboard':
-                return 'fas fa-tachometer-alt';
+                return 'bi bi-columns-gap';
             case 'info-circle':
                     return 'fas fa-info-circle';
             case 'caret-right':

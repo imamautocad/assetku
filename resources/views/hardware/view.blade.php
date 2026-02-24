@@ -523,6 +523,28 @@
                                         </div>
                                     @endif
 
+				@if ($asset->cpu)
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <strong>{{ trans('admin/hardware/form.cpu') }}</strong>
+                                            </div>
+                                            <div class="col-md-9">
+                                                {{ $asset->cpu  }}
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if ($asset->ram)
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <strong>{{ trans('admin/hardware/form.ram') }}</strong>
+                                            </div>
+                                            <div class="col-md-9">
+                                                {{ $asset->ram  }}
+                                            </div>
+                                        </div>
+                                    @endif
+
                                     @if ($asset->last_checkout!='')
                                         <div class="row">
                                             <div class="col-md-3">

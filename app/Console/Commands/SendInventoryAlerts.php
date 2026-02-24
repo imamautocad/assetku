@@ -52,7 +52,10 @@ class SendInventoryAlerts extends Command
                     return new AlertRecipient($item);
                 });
 
-                \Notification::send($recipients, new InventoryAlert($items, $settings->alert_threshold));
+              //  \Notification::send($recipients, new InventoryAlert($items, $settings->alert_threshold));
+              $emails = array_map('trim', explode(',', env('LOW_INVENTORY_EMAILS')));
+              Notification::route('mail', $emails)
+                ->notify(new InventoryAlert($items, $settings->alet_threshold));
             }
         } else {
             if ($settings->alert_email == '') {

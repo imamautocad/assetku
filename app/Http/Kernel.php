@@ -1,9 +1,8 @@
 <?php
 
 namespace App\Http;
-
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
-
+//use app\Http\Middleware\CheckPermission as Permission;
 class Kernel extends HttpKernel
 {
     /**
@@ -75,5 +74,9 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'api-throttle' => \App\Http\Middleware\SetAPIResponseHeaders::class,
         'health' => null,
+        'permission' => \App\Http\Middleware\CheckPermissions::class,
+            // middleware custom kita
+        'checkPermissionGroup' => \App\Http\Middleware\CheckPermissionGroup::class,
+
     ];
 }

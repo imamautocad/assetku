@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Gate;
 use Laravel\Passport\HasApiTokens;
 use Watson\Validating\ValidatingTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\DB;
 
 class User extends SnipeModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, HasLocalePreference
 {
@@ -47,7 +48,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         'country',
         'department_id',
         'email',
-        'employee_num',
+        'employee_num', 
         'first_name',
         'jobtitle',
         'last_name',
@@ -57,6 +58,9 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         'manager_id',
         'password',
         'phone',
+        'ifca_user',
+        'vpn_user',
+        'intranet_user',
         'notes',
         'state',
         'username',
@@ -79,6 +83,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         'created_at'   => 'datetime',
         'updated_at'   => 'datetime',
         'deleted_at'   => 'datetime',
+        // 'permissions' => 'array',
     ];
 
     /**
@@ -126,6 +131,9 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         'locale',
         'notes',
         'phone',
+        'ifca_user',
+        'intranet_user',
+        'vpn_user',
         'state',
         'username',
         'website',
@@ -230,10 +238,64 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      * @since [v1.0]
      * @return bool
      */
-    public function isSuperUser()
-    {
+   public function isSuperUser()
+{
+    if (method_exists($this, 'checkPermissionSection')) {
         return $this->checkPermissionSection('superuser');
     }
+
+    try {
+        $perms = is_string($this->permissions)
+            ? json_decode($this->permissions, true)
+            : (array) $this->permissions;
+
+        if (isset($perms['superuser']) && $perms['superuser'] == "1") {
+            return true;
+        }
+    } catch (\Throwable $e) {}
+
+    return ($this->is_admin ?? 0) == 1;
+}
+
+public function isAdmin()
+{
+    // if (isset($this->is_admin) && $this->is_admin == 1) {
+    //     return true;
+    // }
+
+    // try {
+    //     $perms = is_string($this->permissions)
+    //         ? json_decode($this->permissions, true)
+    //         : (array) $this->permissions;
+
+    //     if (isset($perms['admin']) && $perms['admin'] == "1") {
+    //         return true;
+    //     }
+    // } catch (\Throwable $e) {}
+
+    // return false;
+    return $this->isSuperUser();
+}
+public function isInGroup($groupId)
+{
+    try {
+        return DB::table('users_groups')
+            ->where('user_id', $this->id)
+            ->where('group_id', $groupId)
+            ->exists();
+    } catch (\Throwable $e) {
+        return false;
+    }
+}
+
+/**
+ * Central check: apakah user boleh melihat semua orders?
+ * Syarat: superuser OR admin OR group 11
+ */
+public function canViewAllOrders()
+{
+    return $this->isSuperUser() || $this->isAdmin() || $this->isInGroup(11);
+}
 
 
     /**
@@ -294,7 +356,8 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     public function department()
     {
         return $this->belongsTo(\App\Models\Department::class, 'department_id');
-    }
+        return $this->belongsTo(Department::class);
+    }   
 
     /**
      * Checks activated status
@@ -967,6 +1030,9 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
             ->orWhere('users.permissions', 'LIKE', '%' . $search . '%')
             ->orWhere('users.country', 'LIKE', '%' . $search . '%')
             ->orWhere('users.phone', 'LIKE', '%' . $search . '%')
+            ->orWhere('users.ifca_user', 'LIKE', '%' . $search . '%')
+            ->orWhere('users.vpn_user', 'LIKE', '%' . $search . '%')
+            ->orWhere('users.intranet_user', 'LIKE', '%' . $search . '%')
             ->orWhere('users.jobtitle', 'LIKE', '%' . $search . '%')
             ->orWhere('users.employee_num', 'LIKE', '%' . $search . '%')
             ->orWhere('users.username', 'LIKE', '%' . $search . '%')
@@ -1046,4 +1112,11 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         }
         return false;
     }
+
+    public function permission_groups()
+    {
+        return $this->belongsTo(\App\Models\PermissionGroup::class, 'group_id');
+    }
+
+    
 }

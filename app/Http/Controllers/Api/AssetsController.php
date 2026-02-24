@@ -35,6 +35,8 @@ use Illuminate\Support\Facades\Route;
 use App\View\Label;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+
 
 
 /**
@@ -93,6 +95,8 @@ class AssetsController extends Controller
             'name',
             'asset_tag',
             'serial',
+            'cpu',
+            'ram',
             'model_number',
             'last_checkout',
             'last_checkin',
@@ -127,27 +131,72 @@ class AssetsController extends Controller
         foreach ($all_custom_fields as $field) {
             $allowed_columns[] = $field->db_column_name();
         }
+$user = Auth::user();
 
-        $assets = Asset::select('assets.*')
-            ->with(
-                'model',
-                'location',
-                'assetstatus',
-                'company',
-                'defaultLoc',
-                'assignedTo',
-                'adminuser',
-                'model.depreciation',
-                'model.category',
-                'model.manufacturer',
-                'model.fieldset',
-                'supplier'
-            ); // it might be tempting to add 'assetlog' here, but don't. It blows up update-heavy users.
+$assets = Asset::select('assets.*')
+    ->with([
+        'model',
+        'location',
+        'assetstatus',
+        'company',
+        'defaultLoc',
+        'assignedTo',
+        'model.depreciation',
+        'model.category',
+        'model.manufacturer',
+        'model.fieldset',
+        'supplier'
+    ]);
+    //->where ('company_id',Auth::user()->company_id);
+
+// if (json_decode($user->permissions)->superuser == '1') {
+//     $assets->whereIn('byod', [0, 1])
+//     ->whereNotNull('company_id');
+// } else {
+//     $assets->where('company_id', $user->company_id)
+//            ->where('byod', 0);
+// }
+
+//$assets = $assets->get(); // ✅ eksekusi di akhir
 
 
-        if ($filter_non_deprecable_assets) {
-            $non_deprecable_models = AssetModel::select('id')->whereNotNull('depreciation_id')->get();
-            $assets->InModelList($non_deprecable_models->toArray());
+
+//dd($user); 
+
+        // $assets = Asset::select('assets.*')
+        //     ->with(
+        //         'model',
+        //         'location',
+        //         'assetstatus',
+        //         'company',
+        //         'defaultLoc',
+        //         'assignedTo',
+        //         'adminuser',
+        //         // 'cpu',
+        //         // 'ram',
+        //         'model.depreciation',
+        //         'model.category',
+        //         'model.manufacturer',
+        //         'model.fieldset',
+        //         'supplier'
+        //     );
+        //    ->where('company_id', Auth::user()->company_id) ; // it might be tempting to add 'assetlog' here, but don't. It blows up update-heavy users.
+
+        /*
+        |--------------------------------------------------------------------------
+        | GLOBAL ASSET VISIBILITY FILTER
+        |--------------------------------------------------------------------------
+        | IT  = lihat semua
+        | GA  = hanya status label mengandung "GA"
+        */
+       if (
+            ! $user->isSuperUser() &&
+            $user->department &&
+            stripos($user->department->name, 'IT') === false
+        ) {
+            $assets->whereHas('assetstatus', function ($q) {
+                $q->where('name', 'like', '%GA%');
+            });
         }
 
 

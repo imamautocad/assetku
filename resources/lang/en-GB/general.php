@@ -31,6 +31,8 @@ return [
     'asset_tags'            => 'Asset Tags',
     'assets_available'		=> 'Assets available',
     'accept_assets'         => 'Accept Assets :name',
+    'cpu'                   => 'cpu',
+    'ram'                   => 'ram',
     'accept_assets_menu'    => 'Accept Assets',
     'accept_item'           => 'Accept Item',
     'audit'				    => 'Audit',

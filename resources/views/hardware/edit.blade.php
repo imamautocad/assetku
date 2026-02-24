@@ -16,8 +16,8 @@
 
 {{-- Page content --}}
 @section('inputFields')
-    
-    @include ('partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
+
+   @include ('partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
 
 
   <!-- Asset Tag -->
@@ -46,13 +46,14 @@
                   <x-icon type="plus" />
                   <span class="sr-only">
                       {{ trans('general.new') }}
-                  </span>
+                  </span> 
               </button>
           </div>
       @endif
   </div>
-
-    @include ('partials.forms.edit.serial', ['fieldname'=> 'serials[1]', 'old_val_name' => 'serials.1', 'translated_serial' => trans('admin/hardware/form.serial')])
+@include ('partials.forms.edit.cpu', ['fieldname'=> 'cpu[1]', 'old_val_name' => 'cpu.1', 'translated_serial' => trans('admin/hardware/form.cpu')])
+@include ('partials.forms.edit.ram', ['fieldname'=> 'ram[1]', 'old_val_name' => 'ram.1', 'translated_serial' => trans('admin/hardware/form.ram')])
+@include ('partials.forms.edit.serial', ['fieldname'=> 'serials[1]', 'old_val_name' => 'serials.1', 'translated_serial' => trans('admin/hardware/form.serial')])
 
     <div class="input_fields_wrap">
     </div>
@@ -107,12 +108,13 @@
                     {{ trans('admin/hardware/form.optional_infos') }}
                 </a>
             </legend>
-
+ 
             <div id="optional_details" class="col-md-12" style="display:none">
                 @include ('partials.forms.edit.name', ['translated_name' => trans('admin/hardware/form.name')])
                 @include ('partials.forms.edit.warranty')
                 @include ('partials.forms.edit.datepicker', ['translated_name' => trans('admin/hardware/form.expected_checkin'),'fieldname' => 'expected_checkin'])
                 @include ('partials.forms.edit.datepicker', ['translated_name' => trans('general.next_audit_date'),'fieldname' => 'next_audit_date', 'help_text' => trans('general.next_audit_date_help')])
+                @include ('partials.forms.edit.datepicker', ['translated_name' => 'Broken Date','fieldname' => 'broken_date'])
                 <!-- byod checkbox -->
                 <div class="form-group byod">
                     <div class="col-md-7 col-md-offset-3">

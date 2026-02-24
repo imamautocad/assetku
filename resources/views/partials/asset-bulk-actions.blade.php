@@ -1,4 +1,4 @@
-<div id="{{ (isset($id_divname)) ? $id_divname : 'assetsBulkEditToolbar' }}" style="min-width:400px">
+<div id="{{ (isset($id_divname)) ? $id_divname : 'assetsBulkEditToolbar' }}" style="min-width:340px">
     <form
     method="POST"
     action="{{ route('hardware/bulkedit') }}"
@@ -16,7 +16,7 @@
             {{ trans('button.bulk_actions') }}
         </span>
     </label>
-    <select name="bulk_actions" class="form-control select2" aria-label="bulk_actions" style="min-width: 350px;">
+    <select name="bulk_actions" class="form-control select2" aria-label="bulk_actions" style="min-width: 340px;">
         @if ((isset($status)) && ($status == 'Deleted'))
             @can('delete', \App\Models\Asset::class)
                 <option value="restore">{{trans('button.restore')}}</option>
@@ -45,3 +45,19 @@
     <button class="btn btn-primary" id="{{ (isset($id_button)) ? $id_button : 'bulkAssetEditButton' }}" disabled>{{ trans('button.go') }}</button>
     </form>
 </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('assetsBulkForm');
+    const select = form.querySelector('select[name="bulk_actions"]');
+
+    form.addEventListener('submit', function () {
+        if (select.value === 'labels') {
+            form.setAttribute('target', '_blank');
+        } else {
+            form.removeAttribute('target');
+        }
+    });
+});
+</script>

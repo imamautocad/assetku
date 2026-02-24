@@ -156,10 +156,12 @@ class Location extends SnipeModel
     public function assets()
     {
         return $this->hasMany(\App\Models\Asset::class, 'location_id')
+            //->whereNull('assets.deleted_at')
             ->whereHas('assetstatus', function ($query) {
                 $query->where('status_labels.deployable', '=', 1)
                         ->orWhere('status_labels.pending', '=', 1)
-                        ->orWhere('status_labels.archived', '=', 0);
+                        ->orWhere('status_labels.archived', '=', 0)
+                        ->orWhere('deleted_at','=',null);
             });
     }
 

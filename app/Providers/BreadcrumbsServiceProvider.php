@@ -21,6 +21,8 @@ use App\Models\PredefinedKit;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Models\Website;
+use App\Models\ConsumableOrder;
 use Illuminate\Support\ServiceProvider;
 use Tabuna\Breadcrumbs\Breadcrumbs;
 use Tabuna\Breadcrumbs\Trail;
@@ -566,10 +568,73 @@ class BreadcrumbsServiceProvider extends ServiceProvider
         $trail->parent('users.index', route('users.index'))
             ->push(trans('general.breadcrumb_button_actions.edit_item', ['name' => $user->name]), route('users.edit', $user))
         );
+        
+        /*Menu Website*/
+        Breadcrumbs::for('website.index', fn (Trail $trail) =>
+        $trail->parent('home', route('home'))
+            ->push(trans('Website'), route('website.index'))
+        );
 
+        Breadcrumbs::for('website.create', fn (Trail $trail) =>
+        $trail->parent('website.index', route('website.index'))
+            ->push(trans('Website Create'), route('website.create'))
+        );
 
+        // Breadcrumbs::for('website.show', fn (Trail $trail, Website $website) =>
+        // $trail->parent('website.index', route('website.index'))
+        //     ->push($website->name, route('website.show', $website))
+        // );
+
+        Breadcrumbs::for('website.edit', fn (Trail $trail, Website $website) =>
+        $trail->parent('website.index', route('website.index'))
+            ->push(trans('general.breadcrumb_button_actions.edit_item',['name' => $website->decs]), route('website.edit', $website))
+        );
+
+        /*Menu ConsumablenStock*/
+        Breadcrumbs::for('consumable.stock.index', fn (Trail $trail) =>
+        $trail->parent('home', route('home'))
+            ->push(trans('Consumable Stock'), route('consumable.stock.index'))
+        );
+
+        Breadcrumbs::for('consumable.stock.create', fn (Trail $trail) =>
+        $trail->parent('consumable.stock.index', route('consumable.stock.index'))
+            ->push(trans('Consumable Stock Create'), route('consumable.stock.create'))
+        );
+
+        Breadcrumbs::for('consumable.stock.show', function (Trail $trail, $orderId) {
+            $order = ConsumableOrder::findOrFail($orderId);
+
+            $trail->parent('consumable.stock.index');
+            $trail->push($order->no_req, route('consumable.stock.show', $order->id));
+        });
+
+         Breadcrumbs::for('consumable.stock.edit', function (Trail $trail, $orderId) {
+            $order = ConsumableOrder::findOrFail($orderId);
+
+            $trail->parent('consumable.stock.index');
+            $trail->push($order->no_req, route('consumable.stock.edit', $order->id));
+        });
+
+        /*Menu ConsumableUser*/
+        Breadcrumbs::for('consumable.orders.index', fn (Trail $trail) =>
+        $trail->parent('home', route('home'))
+            ->push(trans('Consumable Orders'), route('consumable.orders.index'))
+        );
+        Breadcrumbs::for('consumable.orders.create', fn (Trail $trail) =>
+        $trail->parent('consumable.orders.index', route('consumable.orders.index'))
+            ->push(trans('Consumable Orders Create'), route('consumable.orders.create'))
+        );
+        Breadcrumbs::for('consumable.orders.show', function (Trail $trail, $orderId) {
+            $order = ConsumableOrder::findOrFail($orderId);
+            $trail->parent('consumable.orders.index');
+            $trail->push($order->no_req, route('consumable.orders.show', $order->id));
+        });
+         Breadcrumbs::for('consumable.orders.edit', function (Trail $trail, $orderId) {
+            $order = ConsumableOrder::findOrFail($orderId);
+
+            $trail->parent('consumable.orders.index');
+            $trail->push($order->no_req, route('consumable.orders.edit', $order->id));
+        });
 
     }
-
-
 }

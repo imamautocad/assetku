@@ -4,102 +4,160 @@ namespace App\Models\Labels\Tapes\Brother;
 
 class TZe_24mm_B extends TZe_24mm
 {
-    private const BARCODE_MARGIN =   1.40;
-    private const TAG_SIZE       =   2.80;
-    private const LOGO_MAX_WIDTH =  20.00;
-    private const LOGO_MARGIN    =   2.20;
-    private const TITLE_SIZE     =   2.80;
-    private const TITLE_MARGIN   =   0.50;
-    private const LABEL_SIZE     =   2.00;
-    private const LABEL_MARGIN   = - 0.35;
-    private const FIELD_SIZE     =   3.20;
-    private const FIELD_MARGIN   =   0.15;
+    /*
+     * ===== KONFIGURASI AMAN UNTUK 40x20 mm =====
+     */
+    private const BARCODE_MARGIN = 1.20;
 
+    private const TITLE_SIZE   = 2.10;
+    private const TITLE_MARGIN = 0.20;
+
+    private const LABEL_SIZE   = 1.60;
+    private const LABEL_MARGIN = 0.05;
+
+    private const FIELD_SIZE   = 1.90;
+    private const FIELD_MARGIN = 0.10;
+
+    private const LOGO_MAX_WIDTH = 5.50;
+    private const LOGO_MARGIN    = 0.60;
+    private const TITLE_OFFSET_Y = -0.7;
+    private const LOGO_OFFSET_Y = 0.8; 
+    private const LOGO_OFFSET_X = 2; // mm, minus = geser ke kanan
+
+    /*
+     * ===== UKURAN LABEL =====
+     */
     public function getUnit()  { return 'mm'; }
-    public function getWidth() { return 73.0; }
-    public function getSupportAssetTag()  { return true; }
+    public function getWidth() { return 40.0; }
+
+    /*
+     * ===== SUPPORT =====
+     */
+    public function getSupportAssetTag()  { return false; }
     public function getSupport1DBarcode() { return false; }
     public function getSupport2DBarcode() { return true; }
-    public function getSupportFields()    { return 3; }
+    public function getSupportFields()    { return 4; } // field
     public function getSupportLogo()      { return true; }
     public function getSupportTitle()     { return true; }
 
     public function preparePDF($pdf) {}
 
-    public function write($pdf, $record) {
+    public function write($pdf, $record)
+    {
         $pa = $this->getPrintableArea();
 
-        $currentX = $pa->x1;
+        $currentX = $pa->x1 - 1.2;
         $currentY = $pa->y1;
-        $usableWidth = $pa->w;
+
+        $usableWidth  = $pa->w;
         $usableHeight = $pa->h;
 
-        $barcodeSize = $pa->h - self::TAG_SIZE;
-
+        /*
+         * ===== QR CODE (KIRI) =====
+         */
         if ($record->has('barcode2d')) {
-            static::writeText(
-                $pdf, $record->get('tag'),
-                $pa->x1, $pa->y2 - self::TAG_SIZE,
-                'freemono', 'b', self::TAG_SIZE, 'C',
-                $barcodeSize, self::TAG_SIZE, true, 0
+
+            $barcodeSize = min(
+                $usableHeight - 0.6,
+                14.5
             );
+
+            $barcodeTopY = $currentY;
+
             static::write2DBarcode(
-                $pdf, $record->get('barcode2d')->content, $record->get('barcode2d')->type,
-                $currentX, $currentY,
-                $barcodeSize, $barcodeSize
+                $pdf,
+                $record->get('barcode2d')->content,
+                $record->get('barcode2d')->type,
+                $currentX,
+                $barcodeTopY,
+                $barcodeSize,
+                $barcodeSize
             );
-            $currentX += $barcodeSize + self::BARCODE_MARGIN;
+
+            // Geser area teks ke kanan QR
+            $currentX    += $barcodeSize + self::BARCODE_MARGIN;
             $usableWidth -= $barcodeSize + self::BARCODE_MARGIN;
-        } else {
-            static::writeText(
-                $pdf, $record->get('tag'),
-                $pa->x1, $pa->y2 - self::TAG_SIZE,
-                'freemono', 'b', self::TAG_SIZE, 'R',
-                $usableWidth, self::TAG_SIZE, true, 0
-            );
+
+            // 🔥 TOP ALIGN dengan QR
+            $currentY = $barcodeTopY + self::TITLE_OFFSET_Y;
         }
 
-        $usableWidth -= self::LOGO_MAX_WIDTH - self::LOGO_MARGIN;
-
+        /*
+         * ===== TITLE =====
+         */
         if ($record->has('title')) {
             static::writeText(
-                $pdf, $record->get('title'),
-                $currentX, $currentY,
-                'freesans', '', self::TITLE_SIZE, 'L',
-                $usableWidth, self::TITLE_SIZE, true, 0
+                $pdf,
+                $record->get('title'),
+                $currentX,
+                $currentY,
+                'freesans',
+                'B',
+                self::TITLE_SIZE,
+                'L',
+                $usableWidth,
+                self::TITLE_SIZE * 0.9,
+                true
             );
             $currentY += self::TITLE_SIZE + self::TITLE_MARGIN;
         }
 
-        foreach ($record->get('fields') as $field) {
+        /*
+         * ===== FIELDS (3 BARIS) =====
+         */
+        foreach ($record->get('fields')->take(4) as $field) {
+
             static::writeText(
-                $pdf, $field['label'],
-                $currentX, $currentY,
-                'freesans', '', self::LABEL_SIZE, 'L',
-                $usableWidth, self::LABEL_SIZE, true, 0, 0
+                $pdf,
+                $field['label'],
+                $currentX,
+                $currentY,
+                'freesans',
+                '',
+                self::LABEL_SIZE,
+                'L',
+                $usableWidth,
+                self::LABEL_SIZE * 0.85,
+                true
             );
+
             $currentY += self::LABEL_SIZE + self::LABEL_MARGIN;
 
             static::writeText(
-                $pdf, $field['value'],
-                $currentX, $currentY,
-                'freemono', 'B', self::FIELD_SIZE, 'L',
-                $usableWidth, self::FIELD_SIZE, true, 0, 0.3
+                $pdf,
+                $field['value'],
+                $currentX,
+                $currentY,
+                'freesans',
+                'B',
+                self::FIELD_SIZE,
+                'L',
+                $usableWidth,
+                self::FIELD_SIZE * 0.9,
+                true
             );
+
             $currentY += self::FIELD_SIZE + self::FIELD_MARGIN;
         }
 
-         $currentX += $usableWidth + (self::LOGO_MARGIN/2);
-
+        /*
+         * ===== LOGO (HITAM PUTIH / GRAYSCALE) =====
+         */
         if ($record->has('logo')) {
-            $logoSize = static::writeImage(
-                $pdf, $record->get('logo'),
-                $currentX, $pa->y1,
-                self::LOGO_MAX_WIDTH, $usableHeight,
-                'L', 'T', 300, true, false, 0
+            static::writeImage(
+                $pdf,
+                $record->get('logo'),
+                $pa->x2 - self::LOGO_MAX_WIDTH - self::LOGO_MARGIN + self::LOGO_OFFSET_X,
+                $pa->y2 - (self::LOGO_MAX_WIDTH * 1.4) + self::LOGO_OFFSET_Y,
+                self::LOGO_MAX_WIDTH,
+                self::LOGO_MAX_WIDTH,
+                'R',
+                'B',
+                300,
+                true,
+                false,
+                 // 🔥 GRAYSCALE
             );
-            $currentX += $logoSize[0] + self::LOGO_MARGIN;
-            $usableWidth -= $logoSize[0] + self::LOGO_MARGIN;
         }
     }
 }

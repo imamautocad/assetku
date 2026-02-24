@@ -111,7 +111,7 @@
             </a>
           </li>
 
-          <li>
+          {{-- <li>
             <a href="#eulas" data-toggle="tab">
             <span class="hidden-lg hidden-md" aria-hidden="true">
                 <x-icon type="files" class="fa-2x" />
@@ -120,7 +120,7 @@
                 {!! ($user->eulas->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($user->eulas->count()).'</span>' : '' !!}
             </span>
             </a>
-          </li>
+          </li> --}}
 
         </ul>
 
@@ -462,6 +462,12 @@
                         {{ trans('general.model_no') }}
                       </th>
                       <th class="col-md-3" data-switchable="true" data-visible="true">
+                        {{ trans('admin/hardware/table.cpu') }}
+                      </th>
+                      <th class="col-md-3" data-switchable="true" data-visible="true">
+                        {{ trans('admin/hardware/table.ram') }}
+                      </th>
+                      <th class="col-md-3" data-switchable="true" data-visible="true">
                         {{ trans('admin/hardware/table.serial') }}
                       </th>
                       <th class="col-md-2" data-switchable="true" data-visible="false">
@@ -522,6 +528,12 @@
                         </td>
                         <td>
                           {{ $asset->model->model_number }}
+                        </td>
+                        <td>
+                          {{ $asset->cpu }}
+                        </td>
+                        <td>
+                          {{ $asset->ram }}
                         </td>
                         <td>
                           {{ $asset->serial }}

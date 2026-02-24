@@ -31,6 +31,7 @@ use Illuminate\Http\Response;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Illuminate\Support\Facades\Auth;
 use TypeError;
 
 /**
@@ -60,7 +61,7 @@ class AssetsController extends Controller
      * @since [v1.0]
      * @param Request $request
      */
-    public function index(Request $request) : View
+    public function index(Request $request) : View 
     {
         $this->authorize('index', Asset::class);
         $company = Company::find($request->input('company_id'));
@@ -75,7 +76,7 @@ class AssetsController extends Controller
      * @since [v1.0]
      * @param Request $request
      * @internal param int $model_id
-     */
+     */ 
     public function create(Request $request) : View
     {
         $this->authorize('create', Asset::class);
@@ -135,6 +136,8 @@ class AssetsController extends Controller
             $asset->company_id              = Company::getIdForCurrentUser($request->input('company_id'));
             $asset->model_id                = $request->input('model_id');
             $asset->order_number            = $request->input('order_number');
+	        $asset->cpu                     = $request->input('cpu');
+            $asset->ram                     = $request->input('ram');
             $asset->notes                   = $request->input('notes');
             $asset->created_by              = auth()->id();
             $asset->status_id               = request('status_id');
@@ -147,6 +150,7 @@ class AssetsController extends Controller
             $asset->requestable             = request('requestable', 0);
             $asset->rtd_location_id         = request('rtd_location_id', null);
             $asset->byod                    = request('byod', 0);
+            $asset->broken_date             = request('broken_date', null);
 
             if (! empty($settings->audit_interval)) {
                 $asset->next_audit_date = Carbon::now()->addMonths((int) $settings->audit_interval)->toDateString();
@@ -352,6 +356,7 @@ class AssetsController extends Controller
         }
         $asset->supplier_id = $request->input('supplier_id', null);
         $asset->expected_checkin = $request->input('expected_checkin', null);
+        $asset->broken_date = $request->input('broken_date', null);
         $asset->requestable = $request->input('requestable', 0);
         $asset->rtd_location_id = $request->input('rtd_location_id', null);
         $asset->byod = $request->input('byod', 0);
@@ -385,7 +390,12 @@ class AssetsController extends Controller
         if (is_array($request->input('serials'))) {
             $asset->serial = $serial[1];
         }
-
+        $cpu = $request->input('cpu');
+        $ram = $request->input('ram'); 
+        //$cpu->cpu = $request->input('cpu');
+	//$ram->ram = $request->input('ram');
+	    $asset->cpu = $cpu;
+        $asset->ram = $ram;
         $asset->name = $request->input('name');
         $asset->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $asset->model_id = $request->input('model_id');
@@ -399,7 +409,7 @@ class AssetsController extends Controller
         }
 
         $asset->notes = $request->input('notes');
-
+ 
         $asset = $request->handleImages($asset);
 
         // Update custom fields in the database.

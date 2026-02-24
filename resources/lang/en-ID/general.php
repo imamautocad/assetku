@@ -24,6 +24,8 @@ return [
     'archived'              => 'Diarsipkan',
     'asset_models'			=> 'Model aset',
     'asset_model'			=> 'Model',
+    'cpu'                   => 'cpu',
+    'ram'                   => 'ram',
     'asset'					=> 'Aset',
     'asset_previous'        => 'Asset (Previously Assigned)',
     'asset_report'          => 'Laporan aset',

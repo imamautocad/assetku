@@ -53,18 +53,16 @@
 @stop
 
 {{-- Page content --}}
-@section('content')
+@section('content') 
 
-<div class="row">
+<div class="row"> 
   <div class="col-md-12">
-    <div class="box">
+    <div class="box"> 
       <div class="box-body">
        
-          <div class="row">
+          <div class="row"> 
             <div class="col-md-12">
-
                 @include('partials.asset-bulk-actions', ['status' => Request::get('status')])
-                   
               <table
                 data-advanced-search="true"
                 data-click-to-select="true"
@@ -79,7 +77,7 @@
                 data-side-pagination="server"
                 data-show-columns="true"
                 data-show-export="true"
-                data-show-footer="true"
+                data-show-footer="true" 
                 data-show-refresh="true"
                 data-sort-order="asc"
                 data-sort-name="name"

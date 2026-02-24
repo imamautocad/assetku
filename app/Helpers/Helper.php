@@ -13,9 +13,10 @@ use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\License;
 use App\Models\Location;
+use Carbon\Carbon;
+use App\Models\Website;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Encryption\DecryptException;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManagerStatic as Image;
@@ -1652,5 +1653,70 @@ class Helper
             }
         }
         return $mismatched;
-    }        
+    }
+        public static function checkExpiringWebsites(int $threshold = 30)
+        {
+            $result = [];
+
+            $websites = Website::wherenull('deleted_at')
+                            ->whereDate('expired_date', '<=', now()->addDays($threshold))
+                            ->whereDate('expired_date', '>=', now())
+                            ->orderBy('expired_date', 'asc')
+                            ->get();
+
+            foreach ($websites as $w) {
+
+                $expired = Carbon::parse($w->expired_date);
+
+                // PAKSA integer
+                $days_left = now()->startOfDay()->diffInDays($expired->startOfDay(), false);
+
+                // progress bar tetap aman
+                $percent = (int)((($threshold - $days_left) / $threshold) * 100);
+                $percent = max(5, min(100, $percent));
+
+                $result[] = [
+                    'id'        => $w->id,
+                    'name'      => $w->name,
+                    'days_left' => $days_left,   // integer bersih
+                    'percent'   => $percent,
+                    'url'       => url('website/'.$w->id),
+                ];
+            }
+
+            return $result;
+        }
+ 
+        public static function checkExpiringLicenses(int $threshold = 30)
+        {
+            $result = [];
+
+            $licenses = License::whereDate('expiration_date', '<=', now()->addDays($threshold))
+                            ->whereDate('expiration_date', '>=', now())
+                            ->orderBy('expiration_date', 'asc')
+                            ->get();
+
+            foreach ($licenses as $l) { 
+
+                $expired = Carbon::parse($l->expiration_date);
+
+                // PAKSA integer
+                $days_left = now()->startOfDay()->diffInDays($expired->startOfDay(), false);
+
+                // progress bar tetap aman
+                $percent = (int)((($threshold - $days_left) / $threshold) * 100);
+                $percent = max(5, min(100, $percent));
+
+                $result[] = [
+                    'id'        => $l->id,
+                    'name'      => $l->name,
+                    'days_left' => $days_left,   // integer bersih
+                    'percent'   => $percent,
+                    'url'       => url('website/'.$l->id),
+                ];
+            }
+
+            return $result;
+        }
+                
 }

@@ -30,15 +30,18 @@ class Actionlog extends SnipeModel
     protected $table = 'action_logs';
     public $timestamps = true;
     protected $fillable = [
-        'created_at',
-        'item_type',
         'created_by',
-        'item_id',
         'action_type',
-        'note',
         'target_id',
         'target_type',
-        'stored_eula'
+        'note',
+        'item_type',
+        'item_id',
+        'action_date',
+        'action_source',
+        'remote_ip',
+        'user_agent',
+        'accept_signature',
     ];
 
     use Searchable;
@@ -460,4 +463,5 @@ class Actionlog extends SnipeModel
     {
         return $query->leftJoin('users as admin_sort', 'action_logs.created_by', '=', 'admin_sort.id')->select('action_logs.*')->orderBy('admin_sort.first_name', $order)->orderBy('admin_sort.last_name', $order);
     }
+
 }

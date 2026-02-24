@@ -24,10 +24,20 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StatuslabelsController;
 use App\Http\Controllers\SuppliersController;
 use App\Http\Controllers\ViewAssetsController;
+use App\Http\Controllers\Assets\AssetBeritaAcaraController;
 use App\Livewire\Importer;
 use App\Models\ReportTemplate;
 use Illuminate\Support\Facades\Route;
 use Tabuna\Breadcrumbs\Trail;
+//use App\Http\Controllers\RequestableConsumableController;
+use App\Http\Controllers\Consumables\ConsumableOrderController;
+use App\Http\Controllers\Reports\ConsumableReportController;
+use App\Http\Controllers\Consumables\ConsumableStockController;
+use App\Http\Controllers\Consumables\ConsumableOrderDetailController;
+use App\Http\Controllers\Api\ConsumableReportApiController;
+use App\Http\Controllers\Websites\WebsiteController;
+use App\Http\Controllers\Api\WebsiteApiController;
+use App\Http\Controllers\Assets\AssetBeritaAcaraController as AssetsAssetBeritaAcaraController;
 
 Route::group(['middleware' => 'auth'], function () {
     /*
@@ -496,6 +506,14 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
 
     Route::get('export/accessories', [ReportsController::class, 'exportAccessoryReport'])
         ->name('reports/export/accessories');
+   
+    //Route::get('reports/detail_report', [ReportsController::class, 'getDetailReport'])
+    //    ->name('reports/detail_report');
+    Route::get('detail', [ReportsController::class, 'getDetailReport'])
+        ->name('reports/detail')
+        ->breadcrumbs(fn (Trail $trail) =>
+        $trail->parent('home')
+            ->push(trans('general.detail_report'), route('reports/detail')));
 
     Route::get('custom', [ReportsController::class, 'getCustomReport'])
         ->name('reports/custom')
@@ -705,5 +723,123 @@ Route::middleware(['auth'])->get(
     [DashboardController::class, 'index']
 )->name('home')
     ->breadcrumbs(fn (Trail $trail) =>
-    $trail->push('Home', route('home'))
+    $trail->push('Home', route('home')) 
     );
+
+/*
+|--------------------------------------------------------------------------
+| Consumable Orders (Custom Feature)
+|--------------------------------------------------------------------------
+*/ 
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('consumable-orders', [ConsumableOrderController::class, 'index'])->name('consumable.orders.index');
+    Route::get('consumable-orders/create', [ConsumableOrderController::class, 'create'])->name('consumable.orders.create');
+    Route::post('consumable-orders', [ConsumableOrderController::class, 'store'])->name('consumable.orders.store');
+    Route::get('consumable-orders/{order}', [ConsumableOrderController::class, 'show'])->name('consumable.orders.show');
+    Route::get('consumable-orders/{order}/edit', [ConsumableOrderController::class, 'edit'])->name('consumable.orders.edit');
+    Route::put('consumable-orders/{order}', [ConsumableOrderController::class, 'update'])->name('consumable.orders.update');
+    Route::get('consumable-orders/print/{id}', [ConsumableOrderController::class, 'print'])->name('consumable.orders.print');
+    
+});
+//Consumable Orders API// 
+Route::middleware(['auth'])->prefix('api')->group(function () {
+    Route::get('/consumable/orders', [\App\Http\Controllers\Api\ConsumableOrderApiController::class, 'index']) 
+        ->name('api.consumable.orders.index');
+});
+
+/*Report Consumable Order*/
+Route::middleware(['auth'])->group(function () {
+    // View laporan utama
+    Route::get('reports/consumables', [ConsumableReportController::class, 'index'])->name('reports.consumables.index');
+    Route::get('reports/consumables/{consumable_id}', [ConsumableReportController::class, 'show'])->name('reports.consumables.show');
+    Route::get('reports/consumables/{id}/print', [ConsumableReportController::class, 'print'])->name('reports.consumables.print');
+    Route::post('reports/consumables/print-selected',[ConsumableReportController::class, 'printSelected'])->name('reports.consumables.printSelected');
+    Route::post('reports/consumables/exportSelectedExcel',[ConsumableReportController::class, 'exportSelectedExcel'])->name('reports.consumables.exportExcel');
+ 
+    // API untuk data tabel
+    // Route::get('api/reports/consumables', [ConsumableReportApiController::class, 'index'])
+    //     ->name('api.reports.consumables.index');
+});
+
+
+/*Route Consumable Stock*/
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('consumable-stock', [ConsumableStockController::class, 'index'])->name('consumable.stock.index');
+    Route::get('consumable-stock/create', [ConsumableStockController::class, 'create'])->name('consumable.stock.create');
+    Route::post('consumable-stock', [ConsumableStockController::class, 'store'])->name('consumable.stock.store');
+    Route::get('consumable-stock/{order}', [ConsumableStockController::class, 'show'])->name('consumable.stock.show');
+    Route::get('consumable-stock/{order}/edit', [ConsumableStockController::class, 'edit'])->name('consumable.stock.edit');
+    Route::put('consumable-stock/{order}', [ConsumableStockController::class, 'update'])->name('consumable.stock.update');
+    Route::get('consumable-stock/print/{id}', [ConsumableStockController::class, 'print'])->name('consumable.stock.print');
+    // Route::get('consumable-stock/{id}/print', [ConsumableStockController::class, 'print'])->name('consumable.stock.print');
+});
+//Consumable Stock API// 
+Route::middleware(['auth'])->prefix('api')->group(function () {
+    Route::get('/consumable/stock', [\App\Http\Controllers\Api\ConsumableStockApiController::class, 'index'])
+        ->name('api.consumable.stock.index');
+});
+ 
+/* Route Menu Website */
+Route::prefix('website')->group(function () {
+    Route::get('/', [WebsiteController::class, 'index'])->name('website.index');
+    Route::get('/create', [WebsiteController::class, 'create'])->name('website.create');
+    Route::post('/store', [WebsiteController::class, 'store'])->name('website.store');
+    Route::get('/{website}', [WebsiteController::class, 'show'])->name('website.show');
+    Route::get('/{website}/edit', [WebsiteController::class, 'edit'])->name('website.edit');
+    Route::put('/{website}', [WebsiteController::class, 'update'])->name('website.update');
+    Route::delete('/{website}', [WebsiteController::class, 'destroy'])->name('website.destroy');
+    Route::put('/{website}/renew', [WebsiteController::class, 'renew'])->name('website.renew');
+});
+// Route Menu Website API
+Route::get('/websites', [WebsiteApiController::class, 'index'])->name('api.website.index');
+
+/* ROUTE FILE (AMAN, NO CONFLICT) */
+Route::prefix('website-file')->group(function () {
+
+    Route::get('/{file}/open', [WebsiteController::class, 'openFile'])
+        ->name('website.file.open');
+
+    Route::delete('/delete/{file}', [WebsiteController::class, 'deleteFile'])
+        ->name('website.file.delete');
+
+});
+
+/* bulk file delete */
+Route::delete('/website-file/bulk-delete', 
+    [WebsiteController::class, 'bulkDeleteFiles']
+)->name('website.file.bulk-delete');
+
+Route::middleware(['auth'])->group(function () {
+
+    // SERAH TERIMA (SUDAH FIX)
+    Route::get(
+        'hardware/{asset}/print-serah-terima',
+        [AssetBeritaAcaraController::class, 'printSerahTerima']
+    )->name('hardware.print.serah_terima');
+
+    // PENGEMBALIAN (BERBASIS ACTION LOG)
+    Route::get(
+        'assets/bast/pengembalian/{asset}',
+        [AssetBeritaAcaraController::class, 'printPengembalian']
+    )->name('hardware.print_pengembalian');
+    //BAST Broken
+    Route::get(
+        'hardware/{asset}/print-serah-broken',
+        [AssetBeritaAcaraController::class, 'printSerahTerimaBroken']
+    )->name('hardware.print.serah_terima_broken');
+
+});
+Route::get(
+    '/bast/verify/{log}',
+    [AssetBeritaAcaraController::class, 'verify']
+)->name('bast.verify');
+
+Route::get(
+    '/bast/qr/{log}',
+    [AssetBeritaAcaraController::class, 'bastQr']
+)->name('bast.qr');
+
+Route::post(
+    'consumables/bulk/labels',
+    [\App\Http\Controllers\Api\ConsumablesController::class, 'bulkLabels']
+)->name('consumables.bulk.labels');  

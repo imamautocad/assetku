@@ -20,6 +20,8 @@ return [
     'purchase_cost'	=> 'Cost',
     'purchase_date'	=> 'Purchased',
     'serial'   		=> 'Serial',
+    'cpu'		=> 'cpu',
+    'ram'	        => 'ram',
     'status'   		=> 'Status',
     'title'      	=> 'Asset ',
     'image'		    => 'Device Image',

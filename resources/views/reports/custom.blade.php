@@ -133,6 +133,16 @@
                 </label>
 
                 <label class="form-control">
+                    <input type="checkbox" name="cpu" value="1" @checked($template->checkmarkValue('cpu')) />
+                    {{ trans('general.cpu') }}
+                </label>
+
+                <label class="form-control">
+                    <input type="checkbox" name="ram" value="1" @checked($template->checkmarkValue('ram')) />
+                    {{ trans('general.ram') }}
+                </label>
+
+                <label class="form-control">
                     <input type="checkbox" name="purchase_date" value="1" @checked($template->checkmarkValue('purchase_date')) />
                     {{ trans('admin/licenses/table.purchase_date') }}
                 </label>

@@ -26,10 +26,69 @@
 </div>
 @endif
 
-<div class="row">
+@push('css')
+<style>
+/* ===============================
+   HARD OVERRIDE MOBILE DASHBOARD
+   =============================== */
+@media (max-width: 768px) {
+
+    /* MATIKAN SEMUA FLEX & GRID */
+    body .flex-dashboard {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* wrapper PALING PENTING */
+    body .flex-dashboard > div {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        float: none !important;
+    }
+
+    /* link */
+    body .flex-dashboard > div > a {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* SMALL BOX — INI KUNCI */
+    body .flex-dashboard .small-box {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        float: none !important;
+        margin: 0 0 16px 0 !important;
+    }
+
+    /* HAPUS STYLE ADMINLTE */
+    body .small-box,
+    body .dashboard {
+        box-sizing: border-box !important;
+    }
+
+    /* isi */
+    body .small-box .inner {
+        padding: 18px !important;
+    }
+
+    /* icon */
+    body .small-box .icon {
+        right: 14px !important;
+        top: 14px !important;
+        font-size: 48px !important;
+    }
+}
+</style>
+@endpush
+
+{{-- <div class="row">
 
     <!-- panel -->
-    <div class="col-lg-2 col-xs-6">
+    <div>
         <a href="{{ route('hardware.index') }}">
             <!-- small hardware box -->
             <div class="dashboard small-box bg-teal">
@@ -48,7 +107,7 @@
         </a>
     </div><!-- ./col -->
 
-    <div class="col-lg-2 col-xs-6">
+    <div>
         <a href="{{ route('licenses.index') }}" aria-hidden="true">
             <!-- small license box -->
             <div class="dashboard small-box bg-maroon">
@@ -68,7 +127,7 @@
     </div><!-- ./col -->
 
 
-    <div class="col-lg-2 col-xs-6">
+    <div>
     <!-- small accessories box -->
         <a href="{{ route('accessories.index') }}">
             <div class="dashboard small-box bg-orange">
@@ -87,7 +146,7 @@
         </a>
     </div><!-- ./col -->
 
-    <div class="col-lg-2 col-xs-6">
+    <div>
     <!-- small consumables box -->
         <a href="{{ route('consumables.index') }}">
             <div class="dashboard small-box bg-purple">
@@ -106,7 +165,7 @@
         </a>
     </div><!-- ./col -->
 
-    <div class="col-lg-2 col-xs-6">
+    <div>
         <!-- small components box -->
         <a href="{{ route('components.index') }}">
             <div class="dashboard small-box bg-yellow">
@@ -125,7 +184,26 @@
         </a>
     </div><!-- ./col -->
 
-    <div class="col-lg-2 col-xs-6">
+    <div>
+        <!-- small components box -->
+        <a href="{{ route('components.index') }}">
+            <div class="dashboard small-box bg-yellow">
+                <div class="inner">
+                    <h3>{{ number_format($counts['component']) }}</h3>
+                    <p>{{ trans('general.components') }}</p>
+                </div>
+                <div class="icon" aria-hidden="true">
+                    <x-icon type="components" />
+                </div>
+                <span class="small-box-footer">
+                    {{ trans('general.view_all') }}
+                    <x-icon type="arrow-circle-right" />
+                </span>
+            </div>
+        </a>
+    </div><!-- ./col -->
+
+    <div>
         <!-- small users box -->
         <a href="{{ route('users.index') }}">
             <div class="dashboard small-box bg-light-blue">
@@ -144,8 +222,159 @@
         </a>
     </div><!-- ./col -->
 
+</div> --}}
+<style>
+.dashboard.small-box {
+    width: 225px !important;
+    display: inline-block !important;
+}
+.flex-dashboard {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 12px;
+}
+</style>
+
+<div class="flex-dashboard">
+    <div>
+        <a href="{{ route('hardware.index') }}">
+            <!-- small hardware box -->
+            <div class="dashboard small-box bg-teal">
+                <div class="inner">
+                    <h3>{{ number_format(\App\Models\Asset::AssetsForShow()->count()) }}</h3>
+                    <p>{{ trans('general.assets') }}</p>
+                </div>
+                <div class="icon" aria-hidden="true">
+                    <x-icon type="assets" />
+                </div>
+                <span class="small-box-footer">
+                    {{ trans('general.view_all') }}
+                    <x-icon type="arrow-circle-right" />
+                </span>
+            </div>
+        </a>
+    </div><!-- ./col -->
+
+    <div>
+        <a href="{{ route('licenses.index') }}" aria-hidden="true">
+            <!-- small license box -->
+            <div class="dashboard small-box bg-maroon">
+                <div class="inner">
+                    <h3>{{ number_format($counts['license']) }}</h3>
+                    <p>{{ trans('general.licenses') }}</p>
+                </div>
+                <div class="icon" aria-hidden="true">
+                    <x-icon type="licenses" />
+                </div>
+                <span class="small-box-footer">
+                    {{ trans('general.view_all') }}
+                    <x-icon type="arrow-circle-right" />
+                </span>
+            </div>
+        </a>
+    </div><!-- ./col -->
+
+
+    <div>
+    <!-- small accessories box -->
+        <a href="{{ route('accessories.index') }}">
+            <div class="dashboard small-box bg-orange">
+                <div class="inner">
+                    <h3> {{ number_format($counts['accessory']) }}</h3>
+                    <p>{{ trans('general.accessories') }}</p>
+                </div>
+                <div class="icon" aria-hidden="true">
+                    <x-icon type="accessories" />
+                </div>
+                <span class="small-box-footer">
+                    {{ trans('general.view_all') }}
+                <x-icon type="arrow-circle-right" />
+                </span>
+            </div>
+        </a>
+    </div><!-- ./col -->
+
+    <div>
+    <!-- small consumables box -->
+        <a href="{{ route('consumables.index') }}">
+            <div class="dashboard small-box bg-purple">
+                <div class="inner">
+                    <h3> {{ number_format($counts['consumable']) }}</h3>
+                    <p>{{ trans('general.consumables') }}</p>
+                </div>
+                <div class="icon" aria-hidden="true">
+                    <x-icon type="consumables" />
+                </div>
+                <span class="small-box-footer">
+                    {{ trans('general.view_all') }}
+                    <x-icon type="arrow-circle-right" />
+                </span>
+            </div>
+        </a>
+    </div><!-- ./col -->
+
+    <div>
+        <!-- small components box -->
+        <a href="{{ route('components.index') }}">
+            <div class="dashboard small-box bg-yellow">
+                <div class="inner">
+                    <h3>{{ number_format($counts['component']) }}</h3>
+                    <p>{{ trans('general.components') }}</p>
+                </div>
+                <div class="icon" aria-hidden="true">
+                    <x-icon type="components" />
+                </div>
+                <span class="small-box-footer">
+                    {{ trans('general.view_all') }}
+                    <x-icon type="arrow-circle-right" />
+                </span>
+            </div>
+        </a>
+    </div><!-- ./col -->
+
+    <div>
+        <!-- small components box -->
+        <a href="{{ route('website.index') }}">
+            <div class="dashboard small-box bg-green">
+                <div class="inner">
+                    <h3>{{ number_format($counts['website']) }}</h3>
+                    <p>{{('Domain / Hosting') }}</p>
+                </div>
+                <div class="icon bi bi-globe" aria-hidden="true">
+                    {{-- <x-icon type="bi bi-globe" /> --}}
+                </div>
+                <span class="small-box-footer">
+                    {{ trans('general.view_all') }}
+                    <x-icon type="arrow-circle-right" />
+                </span>
+            </div>
+        </a>
+    </div><!-- ./col -->
+
+    <div>
+        <!-- small users box -->
+        <a href="{{ route('users.index') }}">
+            <div class="dashboard small-box bg-light-blue">
+                <div class="inner">
+                    <h3>{{ number_format($counts['user']) }}</h3>
+                    <p>{{ trans('general.people') }}</p>
+                </div>
+                <div class="icon" aria-hidden="true">
+                    <x-icon type="users" />
+                </div>
+                <span class="small-box-footer">
+                    {{ trans('general.view_all') }}
+                    <x-icon type="arrow-circle-right" />
+                </span>
+            </div>
+        </a>
+    </div><!-- ./col -->
+    
+    
 </div>
-</div>
+
+</div> 
 
 @if ($counts['grand_total'] == 0)
 

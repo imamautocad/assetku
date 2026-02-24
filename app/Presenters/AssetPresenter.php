@@ -68,7 +68,38 @@ class AssetPresenter extends Presenter
                 'title' => trans('admin/hardware/form.serial'),
                 'visible' => true,
                 'formatter' => 'hardwareLinkFormatter',
-            ],  [
+            ], 
+            [ 
+                'field' => 'cpu',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('admin/hardware/form.cpu'),
+                'visible' => false,
+                'formatter' => 'hardwareLinkFormatter',
+            ], 
+            [ 
+                'field' => 'ram',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('admin/hardware/form.ram'),
+                'visible' => false,
+                'formatter' => 'hardwareLinkFormatter',
+            ],
+            [ 
+                'field' => 'url',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('admin/hardware/form.url'),
+                'visible' => false,
+                'formatter' => 'hardwareLinkFormatter',
+                
+                
+            ],  
+ 
+             [
                 'field' => 'model',
                 'searchable' => true,
                 'sortable' => true,
@@ -336,7 +367,7 @@ class AssetPresenter extends Presenter
                 'escape' => true,
                 'class' => ($field->field_encrypted == '1') ? 'css-padlock' : '',
                 'visible' => ($field->show_in_listview == '1') ? true : false,
-            ];
+            ]; 
         }
 
         $layout[] = [
@@ -666,9 +697,14 @@ class AssetPresenter extends Presenter
     {
         return route('hardware.show', $this->id);
     }
+    
+    public function url()
+    {
+        return $this->viewUrl();
+    }
 
     public function glyph()
     {
         return '<x-icon type="assets" />';
     }
-}
+} 

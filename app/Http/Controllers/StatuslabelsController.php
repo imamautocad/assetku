@@ -20,8 +20,16 @@ class StatuslabelsController extends Controller
     /**
      * Show a list of all the statuslabels.
      */
-    public function index() : View
+    public function index() : view
     {
+        $user = Auth::user();
+        
+//   $status_navs = Statuslabel::whereHas('creator', function ($query) use ($user) {
+//         $query->where('department_id', $user->department_id);
+//     })->get();
+
+//     return view('statuslabels.index', compact('status_navs'));
+
         $this->authorize('view', Statuslabel::class);
         return view('statuslabels.index');
     }

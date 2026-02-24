@@ -9,3 +9,4 @@ class ComponentPolicy extends CheckoutablePermissionsPolicy
         return 'components';
     }
 }
+ 

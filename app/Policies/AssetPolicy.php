@@ -11,6 +11,8 @@ class AssetPolicy extends CheckoutablePermissionsPolicy
         return 'assets';
     }
 
+    
+
     public function viewRequestable(User $user, Asset $asset = null)
     {
         return $user->hasAccess('assets.view.requestable');
@@ -21,3 +23,4 @@ class AssetPolicy extends CheckoutablePermissionsPolicy
         return $user->hasAccess('assets.audit');
     }
 }
+ 

@@ -69,7 +69,7 @@ class Manufacturer extends SnipeModel
      * The relations and their attributes that should be included when searching the model.
      *
      * @var array
-     */
+     */ 
     protected $searchableRelations = [];
 
     public function isDeletable()
@@ -109,6 +109,11 @@ class Manufacturer extends SnipeModel
     }
 
     public function components()
+    {
+        return $this->hasMany(\App\Models\Component::class, 'manufacturer_id');
+    }
+
+    public function website()
     {
         return $this->hasMany(\App\Models\Component::class, 'manufacturer_id');
     }

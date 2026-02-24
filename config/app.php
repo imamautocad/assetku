@@ -284,6 +284,7 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         Barryvdh\DomPDF\ServiceProvider::class,
+        SimpleSoftwareIO\QrCode\QrCodeServiceProvider::class, //tambahan  qrcode
 
         /*
          * Package Service Providers...
@@ -376,6 +377,7 @@ return [
         'StorageHelper' => App\Helpers\StorageHelper::class,
         'Icon' => App\Helpers\IconHelper::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
+        'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
 
 
     ],

@@ -29,11 +29,14 @@ class AssetsTransformer
         // This uses the getSettings() method so we're pulling from the cache versus querying the settings on single asset
         $setting = Setting::getSettings();
 
-        $array = [
+        $array = [ 
             'id' => (int) $asset->id,
             'name' => e($asset->name),
             'asset_tag' => e($asset->asset_tag),
             'serial' => e($asset->serial),
+            'cpu' => e($asset->cpu),
+            'ram' => e($asset->ram),
+            'url' => route('hardware.show', $asset->id),
             'model' => ($asset->model) ? [
                 'id' => (int) $asset->model->id,
                 'name'=> e($asset->model->name),
@@ -233,6 +236,8 @@ class AssetsTransformer
             'name' => e($asset->name),
             'asset_tag' => e($asset->asset_tag),
             'serial' => e($asset->serial),
+            'cpu' => e($asset->cpu),
+            'ram' => e($asset->ram),
             'image' => ($asset->getImageUrl()) ? $asset->getImageUrl() : null,
             'model' => ($asset->model) ? e($asset->model->name) : null,
             'model_number' => (($asset->model) && ($asset->model->model_number)) ? e($asset->model->model_number) : null,

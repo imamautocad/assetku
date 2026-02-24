@@ -82,7 +82,7 @@ class UsersController extends Controller
     /**
      * Validate and store the new user data, or return an error.
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @author [A. Gianotto] [<snipe@snipe.net>] 
      * @since [v1.0]
      * @param SaveUserRequest $request
      * @return \Illuminate\Http\RedirectResponse
@@ -105,6 +105,9 @@ class UsersController extends Controller
         $user->activated = $request->input('activated', 0);
         $user->jobtitle = $request->input('jobtitle');
         $user->phone = $request->input('phone');
+        $user->ifca_user = $request->input('ifca');
+        $user->vpn_user = $request->input('vpn');
+        $user->intranet_user = $request->input('intranet');
         $user->location_id = $request->input('location_id', null);
         $user->department_id = $request->input('department_id', null);
         $user->company_id = Company::getIdForUser($request->input('company_id', null));
@@ -248,7 +251,7 @@ class UsersController extends Controller
 
         // Only save groups if the user is a superuser
         if (auth()->user()->isSuperUser()) {
-            $user->groups()->sync($request->input('groups'));
+            $user->groups()->sync($request->input('groups')); 
         }
 
         // Update the user fields
@@ -262,6 +265,9 @@ class UsersController extends Controller
         $user->activated = $request->input('activated', 0);
         $user->jobtitle = $request->input('jobtitle', null);
         $user->phone = $request->input('phone');
+        $user->ifca_user = $request->input('ifca');
+        $user->vpn_user = $request->input('vpn');
+        $user->intranet_user = $request->input('intranet');
         $user->location_id = $request->input('location_id', null);
         $user->company_id = Company::getIdForUser($request->input('company_id', null));
         $user->manager_id = $request->input('manager_id', null);

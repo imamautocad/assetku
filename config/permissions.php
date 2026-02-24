@@ -43,7 +43,19 @@ return [
             'note'       => 'Determines whether the user has the ability to view reports.',
             'display'    => true,
         ],
+        
     ],
+    'Reports Consumable' => [
+
+        [
+            'permission' => 'reports_consumable.view',
+            'label'      => 'View',
+            'note'       => 'Determines whether the user has the ability to view reports.',
+            'display'    => true,
+        ],
+
+    ],
+
 
     'Assets' => [
         [

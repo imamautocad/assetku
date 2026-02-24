@@ -62,6 +62,7 @@ class AppServiceProvider extends ServiceProvider
                 Log::error("Your APP_URL in your .env is misconfigured - it is: ".config('app.url').". Many things will work strangely unless you fix it.");
             }
         }
+        
 
         \Illuminate\Pagination\Paginator::useBootstrap();
 

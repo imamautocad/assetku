@@ -80,14 +80,28 @@ class LocationsController extends Controller
             'locations.company_id',
             'locations.notes',
         ])
-            ->withCount('assignedAssets as assigned_assets_count')
-            ->withCount('assignedAssets as assigned_assets_count')
-            ->withCount('assets as assets_count')
-            ->withCount('assignedAccessories as assigned_accessories_count')
-            ->withCount('accessories as accessories_count')
-            ->withCount('rtd_assets as rtd_assets_count')
-            ->withCount('children as children_count')
-            ->withCount('users as users_count')
+            // ->withCount('assignedAssets as assigned_assets_count')
+            // ->withCount('assets as assets_count')
+            // ->withCount('assignedAccessories as assigned_accessories_count')
+            // ->withCount('accessories as accessories_count')
+            // ->withCount('rtd_assets as rtd_assets_count')
+            // ->withCount('children as children_count')
+            // ->withCount('users as users_count')
+            ->withCount([
+                'assets as assets_count' => function ($q) {
+                    $q->whereNull('assets.deleted_at');
+                },
+                'assignedAssets as assigned_assets_count' => function ($q) {
+                    $q->whereNull('assets.deleted_at');
+                },
+                'rtd_assets as rtd_assets_count' => function ($q) {
+                    $q->whereNull('assets.deleted_at');
+                },
+                'assignedAccessories as assigned_accessories_count',
+                'accessories as accessories_count',
+                'children as children_count',
+                'users as users_count',
+            ])
             ->with('adminuser');
 
         // Only scope locations if the setting is enabled
@@ -220,7 +234,7 @@ class LocationsController extends Controller
                 'locations.image',
                 'locations.currency',
                 'locations.company_id',
-                'locations.notes',
+                'locations.notes', 
             ])
             ->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count')
@@ -231,7 +245,7 @@ class LocationsController extends Controller
         return (new LocationsTransformer)->transformLocation($location);
     }
 
-
+ 
     /**
      * Update the specified resource in storage.
      *

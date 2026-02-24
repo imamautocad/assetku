@@ -15,6 +15,9 @@ use Illuminate\Http\Request;
 use App\Http\Requests\ImageUploadRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
+use App\View\ConsumableLabel;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Setting;
 
 class ConsumablesController extends Controller
 {
@@ -324,4 +327,35 @@ class ConsumablesController extends Controller
 
         return (new SelectlistTransformer)->transformSelectlist($consumables);
     }
+    
+   public function bulkLabels(Request $request)
+        {
+            $this->authorize('view', Consumable::class);
+
+            // ambil ID dari checkbox bootstrap-table
+            $ids = collect($request->get('ids'))
+                ->filter()
+                ->unique();
+
+            if ($ids->isEmpty()) {
+                return redirect()
+                    ->back() 
+                    ->with('error', trans('general.nothing_selected'));
+            }
+
+            $consumables = Consumable::whereIn('id', $ids)->get();
+
+            if ($consumables->isEmpty()) {
+                return redirect()
+                    ->back()
+                    ->with('error', trans('general.nothing_selected'));
+            }
+
+            return (new ConsumableLabel())
+                ->with('consumables', $consumables)
+                ->with('settings', Setting::getSettings())
+                ->with('offset', (int) $request->get('offset', 0))
+                ->render();
+        }              
 }
+ 

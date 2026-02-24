@@ -20,6 +20,7 @@ use App\Models\PredefinedKit;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Models\Website;
 use App\Policies\AccessoryPolicy;
 use App\Policies\AssetModelPolicy;
 use App\Policies\AssetPolicy;
@@ -38,6 +39,7 @@ use App\Policies\PredefinedKitPolicy;
 use App\Policies\StatuslabelPolicy;
 use App\Policies\SupplierPolicy;
 use App\Policies\UserPolicy;
+use App\Policies\WebsitePolicy;
 use Carbon\Carbon;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -71,6 +73,7 @@ class AuthServiceProvider extends ServiceProvider
         User::class => UserPolicy::class,
         Manufacturer::class => ManufacturerPolicy::class,
         Company::class => CompanyPolicy::class,
+        Website::class => WebSitePolicy::class,
     ];
 
     /**
@@ -114,7 +117,7 @@ class AuthServiceProvider extends ServiceProvider
          * These control general sections of the admin. These definitions are used in our blades via @can('blah) and also
          * use in our controllers to determine if a user has access to a certain area.
          */
-
+        
         Gate::define('admin', function ($user) {
             if ($user->hasAccess('admin')) {
                 return true;
@@ -132,7 +135,7 @@ class AuthServiceProvider extends ServiceProvider
                 return true;
             }
         });
-
+ 
         Gate::define('consumables.files', function ($user) {
             if ($user->hasAccess('consumables.files')) {
                 return true;

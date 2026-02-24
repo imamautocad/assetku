@@ -39,6 +39,7 @@ Options -Indexes
 
 # DENY ACCESS TO IIS CONFIG FILE
 
+
 # Apache 2.2+
 <IfModule !authz_core_module>
 	<Files "web.config">

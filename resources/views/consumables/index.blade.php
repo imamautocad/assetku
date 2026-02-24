@@ -17,35 +17,43 @@
 
 <div class="row">
   <div class="col-md-12">
-
     <div class="box box-default">
       <div class="box-body">
-        <table
-                data-columns="{{ \App\Presenters\ConsumablePresenter::dataTableLayout() }}"
-                data-cookie-id-table="consumablesTable"
-                data-pagination="true"
-                data-id-table="consumablesTable"
-                data-search="true"
-                data-search-highlight="true"
-                data-show-print="true"
-                data-side-pagination="server"
-                data-footer-style="footerStyle"
-                data-show-columns="true"
-                data-show-export="true"
-                data-show-fullscreen="true"
-                data-show-footer="true"
-                data-show-refresh="true"
-                data-sort-order="asc"
-                data-sort-name="name"
-                data-toolbar="#toolbar"
-                id="consumablesTable"
-                class="table table-striped snipe-table"
-                data-url="{{ route('api.consumables.index') }}"
-                data-export-options='{
-                "fileName": "export-consumables-{{ date('Y-m-d') }}",
-                "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                }'>
-        </table>
+        <div class="row"> 
+            <div class="col-md-12">
+              @include('partials.consumable-bulk-actions', ['status' => Request::get('status')])
+                <table
+                  data-advanced-search="true"
+                  data-click-to-select="true"
+                  data-columns="{{ \App\Presenters\ConsumablePresenter::dataTableLayout() }}"
+                  data-cookie-id-table="consumablesTable"
+                  data-pagination="true"
+                  data-id-table="consumablesTable"
+                  data-search="true"
+                  data-search-highlight="true"
+                  data-show-print="true"
+                  data-side-pagination="server"
+                  data-footer-style="footerStyle"
+                  data-show-columns="true"
+                  data-show-export="true" 
+                  data-show-fullscreen="true"
+                  data-show-footer="true"
+                  data-show-refresh="true"
+                  data-sort-order="asc"
+                  data-sort-name="name"
+                  data-toolbar="#toolbar"
+                  data-bulk-button-id="#bulkConsumableEditButton"
+                  data-bulk-form-id="#consumablessBulkForm"
+                  id="consumablesTable"
+                  class="table table-striped snipe-table"
+                  data-url="{{ route('api.consumables.index') }}"
+                  data-export-options='{
+                  "fileName": "export-consumables-{{ date('Y-m-d') }}",
+                  "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                  }'>
+              </table>
+            </div>
+        </div>
 
       </div><!-- /.box-body -->
     </div><!-- /.box -->

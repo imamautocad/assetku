@@ -40,6 +40,8 @@ dir="{{ Helper::determineLanguageDirection() }}">
         <link rel="stylesheet"
               href="{{ url(mix('css/dist/skins/skin-'.($snipeSettings->skin!='' ? $snipeSettings->skin : 'blue').'.css')) }}">
     @endif
+    {{-- bootstrap 5 icon--}}
+    <link rel="stylesheet" href="{{ asset('vendor/bootstrap-icons/bootstrap-icons.css') }}">
     {{-- page level css --}}
     @stack('css')
 
@@ -88,6 +90,24 @@ dir="{{ Helper::determineLanguageDirection() }}">
 
 
 </head>
+
+{{-- <div id="global-loader" style="
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.4);
+    z-index:99999;
+">
+    <div style="
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform:translate(-50%, -50%);
+    ">
+        <div class="spinner"></div>
+    </div>
+</div> --}}
 
 @if (($snipeSettings) && ($snipeSettings->allow_user_skin==1) && Auth::check() && Auth::user()->present()->skin != '')
     <body class="sidebar-mini skin-{{ $snipeSettings->skin!='' ? Auth::user()->present()->skin : 'blue' }} {{ (session('menu_state')!='open') ? 'sidebar-mini sidebar-collapse' : ''  }}">
@@ -174,6 +194,16 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                     </a>
                                 </li>
                             @endcan
+                            {{-- Consumable Orders --}}
+                            {{-- @can('consumable-order.view')
+                            <li class="{{ request()->is('consumable-orders*') ? 'active' : '' }}">
+                                <a href="{{ route('consumable-orders.index') }}">
+                                    <i class="fa fa-cubes"></i>
+                                    <span>Consumable Orders</span>
+                                </a>
+                            </li>
+                            @endcan --}}
+
                             @can('view', \App\Models\Component::class)
                                 <li aria-hidden="true"{!! (Request::is('components*') ? ' class="active"' : '') !!}>
                                     <a href="{{ route('components.index') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=5" : ''}} tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('general.components') }}">
@@ -257,7 +287,7 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                             <li {!! (Request::is('users/create') ? 'class="active"' : '') !!}>
                                                 <a href="{{ route('users.create') }}" tabindex="-1">
                                                     <x-icon type="users" />
-                                                    {{ trans('general.user') }}
+                                                    {{ trans('general.user') }} 
                                                 </a>
                                             </li>
                                         @endcan
@@ -265,65 +295,122 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                 </li>
                             @endcan
 
-                            @can('admin')
-                                <!-- Tasks: style can be found in dropdown.less -->
-                                <?php $alert_items = ($snipeSettings->show_alerts_in_menu=='1') ? Helper::checkLowInventory() : [];
-                                      $deprecations = Helper::deprecationCheck()
-                                        ?>
+                           @can('admin')
+                            <?php 
+                                $alert_items = ($snipeSettings->show_alerts_in_menu=='1') 
+                                    ? Helper::checkLowInventory() 
+                                    : [];
 
-                                <li class="dropdown tasks-menu">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                        <x-icon type="alerts" />
-                                        <span class="sr-only">{{ trans('general.alerts') }}</span>
-                                        @if(count($alert_items) + count($deprecations))
-                                            <span class="label label-danger">{{ count($alert_items) + count($deprecations)}}</span>
+                                $deprecations = Helper::deprecationCheck();
+                                $expiring_websites = Helper::checkExpiringWebsites(30);
+                                $expiring_licenses = Helper::checkExpiringLicenses(30);
+                                // dd(Helper::checkExpiringWebsites());    
+
+                                $total_alerts = count($alert_items) + count($deprecations) + count($expiring_websites) + count($expiring_licenses);
+                            ?>
+
+                            <li class="dropdown tasks-menu">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <x-icon type="alerts" />
+                                    <span class="sr-only">{{ trans('general.alerts') }}</span>
+
+                                    @if($total_alerts > 0)
+                                        <span class="label label-danger">{{ $total_alerts }}</span>
+                                    @endif
+                                </a>
+
+                                <ul class="dropdown-menu">
+
+                                    {{-- Deprecation checks (superadmin only) --}}
+                                    @can('superadmin')
+                                        @if($deprecations)
+                                            @foreach ($deprecations as $deprecation)
+                                                @if ($deprecation['check'])
+                                                    <li class="header alert-danger">{!! $deprecation['message'] !!}</li>
+                                                @endif
+                                            @endforeach
                                         @endif
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        @can('superadmin')
-                                            @if($deprecations)
-                                                @foreach ($deprecations as $key => $deprecation)
-                                                    @if ($deprecation['check'])
-                                                        <li class="header alert-warning">{!! $deprecation['message'] !!}</li>
-                                                    @endif
-                                                @endforeach
-                                            @endif
-                                        @endcan
-                                        @if($alert_items)
-                                        <li class="header">{{ trans_choice('general.quantity_minimum', count($alert_items)) }}</li>
-                                            <li>
-                                            <!-- inner menu: contains the actual data -->
-                                                <ul class="menu">
-                                                    @for($i = 0; count($alert_items) > $i; $i++)
+                                    @endcan
 
-                                                        <li><!-- Task item -->
-                                                            <a href="{{ route($alert_items[$i]['type'].'.show', $alert_items[$i]['id'])}}">
-                                                                <h2 class="task_menu">{{ $alert_items[$i]['name'] }}
-                                                                    <small class="pull-right">
-                                                                        {{ $alert_items[$i]['remaining'] }} {{ trans('general.remaining') }}
-                                                                    </small>
-                                                                </h2>
-                                                                <div class="progress xs">
-                                                                    <div class="progress-bar progress-bar-yellow"
-                                                                         style="width: {{ $alert_items[$i]['percent'] }}%"
-                                                                         role="progressbar"
-                                                                         aria-valuenow="{{ $alert_items[$i]['percent'] }}"
-                                                                         aria-valuemin="0" aria-valuemax="100">
-                                                                        <span class="sr-only">{{ $alert_items[$i]['percent'] }}% Complete</span>
-                                                                    </div>
+                                    {{-- Low Inventory --}}
+                                    @if($alert_items)
+                                        <li class="header alert alert-warning">
+                                            {{ trans_choice('general.quantity_minimum', count($alert_items)) }}
+                                        </li>
+
+                                        <li>
+                                            <ul class="menu">
+                                                @foreach($alert_items as $item)
+                                                    <li>
+                                                        <a href="{{ route($item['type'].'.show', $item['id']) }}">
+                                                            <h2 class="task_menu">
+                                                                {{ $item['name'] }}
+                                                                <small class="pull-right">{{ $item['remaining'] }} {{ trans('general.remaining') }}</small>
+                                                            </h2>
+                                                            <div class="progress xs">
+                                                                <div class="progress-bar progress-bar-red"
+                                                                    style="width: {{ $item['percent'] }}%">
                                                                 </div>
-                                                            </a>
-                                                        </li>
-                                                        <!-- end task item -->
-                                                    @endfor
-                                                </ul>
-                                            </li>
-                                        @endif
-                                        {{-- <li class="footer">
-                                          <a href="#">{{ trans('general.tasks_view_all') }}</a>
-                                        </li> --}}
-                                    </ul>
-                                </li>
+                                                            </div>
+                                                        </a>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </li>
+                                    @endif
+
+                                    {{-- Expiring Websites --}}
+                                    @if($expiring_websites)
+                                        <li class="header alert alert-warning">
+                                             {{ trans_choice('general.expiring_website', count($expiring_websites)) }}
+                                        </li>
+                                        <li>
+                                            <ul class="menu">
+                                                @foreach($expiring_websites as $exp)
+                                                    <li>
+                                                        <a href="{{ url('website/'.$exp['id']) }}">
+                                                            <h2 class="task_menu">
+                                                                {{ $exp['name'] }}
+                                                                <small class="pull-right">{{ $exp['days_left'] }} days left</small>
+                                                            </h2>
+                                                            <div class="progress xs">
+                                                                <div class="progress-bar progress-bar-red"
+                                                                    style="width: {{ $exp['percent'] }}%">
+                                                                </div>
+                                                            </div>
+                                                        </a>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </li>
+                                    @endif
+                                    @if($expiring_licenses)
+                                        <li class="header alert alert-warning">
+                                             {{ trans_choice('general.expiring_licenses', count($expiring_licenses)) }}
+                                        </li>
+                                        <li>
+                                            <ul class="menu">
+                                                @foreach($expiring_licenses as $exp_licenses)
+                                                    <li>
+                                                        <a href="{{ url('licenses/'.$exp_licenses['id']) }}">
+                                                            <h2 class="task_menu">
+                                                                {{ $exp_licenses['name'] }}
+                                                                <small class="pull-right">{{ $exp_licenses['days_left'] }} days left</small>
+                                                            </h2>
+                                                            <div class="progress xs">
+                                                                <div class="progress-bar progress-bar-red"
+                                                                    style="width: {{ $exp_licenses['percent'] }}%">
+                                                                </div>
+                                                            </div>
+                                                        </a>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </li>
+                                    @endif
+
+                                </ul>
+                            </li>
                             @endcan
 
 
@@ -412,7 +499,7 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                     </ul>
                                 </li>
                             @endif
-
+ 
 
                             @can('superadmin')
                                 <li>
@@ -423,7 +510,7 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                 </li>
                             @endcan
                         </ul>
-                    </div>
+                    </div> 
                 </nav>
                 <a href="#" style="float:left" class="sidebar-toggle-mobile visible-xs btn" data-toggle="push-menu"
                    role="button">
@@ -436,230 +523,225 @@ dir="{{ Helper::determineLanguageDirection() }}">
             <!-- Left side column. contains the logo and sidebar -->
             <aside class="main-sidebar">
                 <!-- sidebar: style can be found in sidebar.less -->
-                <section class="sidebar">
-                    <!-- sidebar menu: : style can be found in sidebar.less -->
-                    <ul class="sidebar-menu" data-widget="tree" {{ \App\Helpers\Helper::determineLanguageDirection() == 'rtl' ? 'style="margin-right:12px' : '' }}>
-                        @can('admin')
-                            <li {!! (\Request::route()->getName()=='home' ? ' class="active"' : '') !!} class="firstnav">
-                                <a href="{{ route('home') }}">
-                                    <x-icon type="dashboard" class="fa-fw" />
-                                    <span>{{ trans('general.dashboard') }}</span>
-                                </a>
-                            </li>
-                        @endcan
-                        @can('index', \App\Models\Asset::class)
-                            <li class="treeview{{ ((Request::is('statuslabels/*') || Request::is('hardware*')) ? ' active' : '') }}">
-                                <a href="#">
-                                    <x-icon type="assets" class="fa-fw" />
-                                    <span>{{ trans('general.assets') }}</span>
-                                    <x-icon type="angle-left" class="pull-right fa-fw"/>
-                                </a>
-                                <ul class="treeview-menu">
-                                    <li>
-                                        <a href="{{ url('hardware') }}">
-                                            <x-icon type="circle" class="text-grey fa-fw"/>
-                                            {{ trans('general.list_all') }}
-                                            <span class="badge">
-                                                {{ (isset($total_assets)) ? $total_assets : '' }}
-                                            </span>
-                                        </a>
-                                    </li>
+                    <section class="sidebar">
+                        <!-- sidebar menu: : style can be found in sidebar.less -->
+                        <ul class="sidebar-menu" data-widget="tree" {{ \App\Helpers\Helper::determineLanguageDirection() == 'rtl' ? 'style="margin-right:12px' : '' }}>
+                            @can('admin')
+                                <li {!! (\Request::route()->getName()=='home' ? ' class="active"' : '') !!} class="firstnav">
+                                    <a href="{{ route('home') }}">
+                                        <x-icon type="dashboard" class="fa-fw" style="font-size:1.8rem" />
+                                        <span>{{ trans('general.dashboard') }}</span>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('index', \App\Models\Asset::class)
+                           @php
+                            $user = Auth::user();
 
-                                    <?php $status_navs = \App\Models\Statuslabel::where('show_in_nav', '=', 1)->withCount('assets as asset_count')->get(); ?>
-                                    @if (count($status_navs) > 0)
-                                        @foreach ($status_navs as $status_nav)
-                                            <li{!! (Request::is('statuslabels/'.$status_nav->id) ? ' class="active"' : '') !!}>
-                                                <a href="{{ route('statuslabels.show', ['statuslabel' => $status_nav->id]) }}">
-                                                    <i class="fas fa-circle text-grey fa-fw"
-                                                       aria-hidden="true"{!!  ($status_nav->color!='' ? ' style="color: '.e($status_nav->color).'"' : '') !!}></i>
-                                                    {{ $status_nav->name }}
-                                                    <span class="badge badge-secondary">{{ $status_nav->asset_count }}</span></a></li>
+                            $status_navs = \App\Models\Statuslabel::where('show_in_nav', 1)
+                                ->when(!$user->can('view_all_assets'), function ($q) {
+                                    $q->where('name', 'like', '%GA%');
+                                })
+                                ->withCount('assets as asset_count')
+                                ->get();
+                            @endphp
+                                <li class="treeview {{ Request::is('hardware*','statuslabels/*') ? 'active menu-open' : '' }}">
+                                    <a href="#">
+                                        <x-icon type="assets" class="fa-fw" style="font-size:1.8rem"/>
+                                        <span>{{ trans('general.assets') }}</span>
+                                        <x-icon type="angle-left" class="pull-right fa-fw"/>
+                                    </a>
+
+                                    <ul class="treeview-menu" style="display: {{ Request::is('hardware*','statuslabels/*') ? 'block' : 'none' }}">
+
+                                        <li class="{{ Request::is('hardware') ? 'active' : '' }}">
+                                            <a href="{{ url('hardware') }}">
+                                                <x-icon type="circle" class="text-grey fa-fw"/>
+                                                {{ trans('general.list_all') }}
+                                            </a>
+                                        </li>
+
+                                        @foreach ($status_navs as $status)
+                                            <li class="{{ Request::is('statuslabels/'.$status->id) ? 'active' : '' }}">
+                                                <a href="{{ route('statuslabels.show', $status->id) }}">
+                                                    <i class="fas fa-circle fa-fw"
+                                                    {!! $status->color ? 'style="color: '.e($status->color).'"' : '' !!}></i>
+                                                    {{ $status->name }}
+                                                    <span class="badge">{{ $status->asset_count }}</span>
+                                                </a>
+                                            </li>
                                         @endforeach
-                                    @endif
 
+                                    </ul>
+                                </li>
 
-                                    <li id="deployed-sidenav-option" {!! (Request::query('status') == 'Deployed' ? ' class="active"' : '') !!}>
-                                        <a href="{{ url('hardware?status=Deployed') }}">
-                                            <x-icon type="circle" class="text-blue fa-fw" />
-                                            {{ trans('general.deployed') }}
-                                            <span class="badge">{{ (isset($total_deployed_sidebar)) ? $total_deployed_sidebar : '' }}</span>
-                                        </a>
-                                    </li>
-                                    <li id="rtd-sidenav-option"{!! (Request::query('status') == 'RTD' ? ' class="active"' : '') !!}>
-                                        <a href="{{ url('hardware?status=RTD') }}">
-                                            <x-icon type="circle" class="text-green fa-fw" />
-                                            {{ trans('general.ready_to_deploy') }}
-                                            <span class="badge">{{ (isset($total_rtd_sidebar)) ? $total_rtd_sidebar : '' }}</span>
-                                        </a>
-                                    </li>
-                                    <li id="pending-sidenav-option"{!! (Request::query('status') == 'Pending' ? ' class="active"' : '') !!}><a href="{{ url('hardware?status=Pending') }}">
-                                            <x-icon type="circle" class="text-orange fa-fw" />
-                                            {{ trans('general.pending') }}
-                                            <span class="badge">{{ (isset($total_pending_sidebar)) ? $total_pending_sidebar : '' }}</span>
-                                        </a>
-                                    </li>
-                                    <li id="undeployable-sidenav-option"{!! (Request::query('status') == 'Undeployable' ? ' class="active"' : '') !!} ><a
-                                                href="{{ url('hardware?status=Undeployable') }}">
-                                            <x-icon type="x" class="text-red fa-fw" />
-                                            {{ trans('general.undeployable') }}
-                                            <span class="badge">{{ (isset($total_undeployable_sidebar)) ? $total_undeployable_sidebar : '' }}</span>
-                                        </a>
-                                    </li>
-                                    <li id="byod-sidenav-option"{!! (Request::query('status') == 'byod' ? ' class="active"' : '') !!}><a
-                                                href="{{ url('hardware?status=byod') }}">
-                                            <x-icon type="x" class="text-red fa-fw" />
-                                            {{ trans('general.byod') }}
-                                            <span class="badge">{{ (isset($total_byod_sidebar)) ? $total_byod_sidebar : '' }}</span>
-                                        </a>
-                                    </li>
-                                    <li id="archived-sidenav-option"{!! (Request::query('status') == 'Archived' ? ' class="active"' : '') !!}><a
-                                                href="{{ url('hardware?status=Archived') }}">
-                                            <x-icon type="x" class="text-red fa-fw" />
-                                            {{ trans('admin/hardware/general.archived') }}
-                                            <span class="badge">{{ (isset($total_archived_sidebar)) ? $total_archived_sidebar : '' }}</span>
-                                        </a>
-                                    </li>
-                                    <li id="requestable-sidenav-option"{!! (Request::query('status') == 'Requestable' ? ' class="active"' : '') !!}><a
-                                                href="{{ url('hardware?status=Requestable') }}">
-                                            <x-icon type="checkmark" class="text-blue fa-fw" />
-                                            {{ trans('admin/hardware/general.requestable') }}
-                                        </a>
-                                    </li>
+                            @endcan
+                            @can('view', \App\Models\License::class)
+                            @if(
+                                    auth()->user()->is_superuser
+                                    ||
+                                    (auth()->user()->hasAccess('admin') 
+                                        && optional(auth()->user()->department)->id == 3)
+                                )
+                                <li{!! (Request::is('licenses*') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('licenses.index') }}">
+                                        <x-icon type="licenses" class="fa-fw" style="font-size:1.8rem"/>
+                                        <span>{{ trans('general.licenses') }}</span>
+                                    </a>
+                                </li>
+                            @endif
+                            @endcan
 
-                                    @can('audit', \App\Models\Asset::class)
-                                        <li id="audit-due-sidenav-option"{!! (Request::is('hardware/audit/due') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('assets.audit.due') }}">
-                                                <x-icon type="audit" class="text-yellow fa-fw"/>
-                                                {{ trans('general.audit_due') }}
-                                                <span class="badge">{{ (isset($total_due_and_overdue_for_audit)) ? $total_due_and_overdue_for_audit : '' }}</span>
+                            @can('index', \App\Models\Accessory::class)
+                            @if(
+                                    auth()->user()->is_superuser
+                                    ||
+                                    (auth()->user()->hasAccess('admin') 
+                                        && optional(auth()->user()->department)->id == 3)
+                                )
+                                <li id="accessories-sidenav-option"{!! (Request::is('accessories*') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('accessories.index') }}">
+                                        <x-icon type="accessories" class="fa-fw" style="font-size:1.8rem" />
+                                        <span>{{ trans('general.accessories') }}</span>
+                                    </a>
+                                </li>
+                            @endif
+                            @endcan
+                            {{-- @can('view', \App\Models\Consumable::class)
+                                <li id="consumables-sidenav-option"{!! (Request::is('consumables*') ? ' class="active"' : '') !!}>
+                                    <a href="{{ url('consumables') }}">
+                                        <x-icon type="consumables" class="fa-fw" style="font-size:1.8rem"/>
+                                        <span>{{ trans('general.consumables') }}</span>
+                                    </a>
+                                </li>
+                            @endcan --}}
+                            @can('index', \App\Models\Consumable::class)
+                                <li class="treeview {{ Request::is('consumables*') || Request::is('consumables/stock*') ? 'active menu-open' : '' }}">
+                                    <a href="#">
+                                        <x-icon type="consumables" class="fa-fw" />
+                                        <span>{{ trans('general.consumables') }}</span>
+                                        <i class="fa fa-angle-left pull-right"></i>
+                                    </a>
+
+                                    <ul class="treeview-menu" style="display: {{ Request::is('consumables*') || Request::is('consumables/stock*') ? 'block' : 'none' }};">
+
+                                        {{-- SUBMENU 1: ALL CONSUMABLES --}}
+                                        <li class="{{ Request::is('consumables') || Request::is('consumables/*') && !Request::is('consumables/stock*') ? 'active' : '' }}">
+                                            <a href="{{ url('consumables') }}" 
+                                                {{ $snipeSettings->shortcuts_enabled == 1 ? "accesskey=4" : '' }}>
+                                                <i class="fa fa-circle-o"></i> {{ trans('general.consumables') }}
                                             </a>
                                         </li>
-                                    @endcan
 
-                                    @can('checkin', \App\Models\Asset::class)
-                                    <li id="checkin-due-sidenav-option"{!! (Request::is('hardware/checkins/due') ? ' class="active"' : '') !!}>
-                                        <a href="{{ route('assets.checkins.due') }}">
-                                            <x-icon type="due" class="text-orange fa-fw"/>
-                                            {{ trans('general.checkin_due') }}
-                                            <span class="badge">{{ (isset($total_due_and_overdue_for_checkin)) ? $total_due_and_overdue_for_checkin : '' }}</span>
-                                        </a>
-                                    </li>
-                                    @endcan
-
-                                    <li class="divider">&nbsp;</li>
-                                    @can('checkin', \App\Models\Asset::class)
-                                        <li{!! (Request::is('hardware/quickscancheckin') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('hardware/quickscancheckin') }}">
-                                                {{ trans('general.quickscan_checkin') }}
+                                        {{-- SUBMENU 2: CONSUMABLE STOCK --}}
+                                        <li class="{{ Request::is('consumables/stock*') ? 'active' : '' }}">
+                                            <a href="{{ route('consumable.stock.index') }}">
+                                                <i class="fa fa-circle-o"></i> Consumable Stock
                                             </a>
                                         </li>
-                                    @endcan
 
-                                    @can('checkout', \App\Models\Asset::class)
-                                        <li{!! (Request::is('hardware/bulkcheckout') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('hardware.bulkcheckout.show') }}">
-                                                {{ trans('general.bulk_checkout') }}
-                                            </a>
-                                        </li>
-                                        <li{!! (Request::is('hardware/requested') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('assets.requested') }}">
-                                                {{ trans('general.requested') }}</a>
-                                        </li>
-                                    @endcan
+                                    </ul>
+                                </li>
+                            @endcan
+                            {{-- @can('view', \App\Models\Component::class)
+                                <li id="components-sidenav-option"{!! (Request::is('components*') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('components.index') }}">
+                                        <x-icon type="components" class="fa-fw" style="font-size:1.8rem"/>
+                                        <span>{{ trans('general.components') }}</span>
+                                    </a>
+                                </li>
+                            @endcan --}}
+                            @can('view', \App\Models\Component::class)
+                                @if(
+                                    auth()->user()->is_superuser
+                                    ||
+                                    (auth()->user()->hasAccess('admin') 
+                                        && optional(auth()->user()->department)->id == 3)
+                                )
+                                <li id="components-sidenav-option"{!! (Request::is('components*') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('components.index') }}">
+                                        <x-icon type="components" class="fa-fw" style="font-size:1.8rem"/>
+                                        <span>{{ trans('general.components') }}</span>
+                                    </a>
+                                </li>
+                                @endif
+                            @endcan
+                            @can('view', \App\Models\PredefinedKit::class)
+                                @if(
+                                    auth()->user()->is_superuser
+                                    ||
+                                    (auth()->user()->hasAccess('admin') 
+                                        && optional(auth()->user()->department)->id == 3)
+                                )
+                                <li id="kits-sidenav-option"{!! (Request::is('kits') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('kits.index') }}">
+                                        <x-icon type="kits" class="fa-fw" style="font-size:1.8rem"/>
+                                        <span>{{ trans('general.kits') }}</span>
+                                    </a>
+                                </li>
+                                @endif
+                            @endcan
+                            {{-- <li class="{{ Request::is('website*') ? 'active' : '' }}">
+                                <a href="{{ route('website.index') }}">
+                                    <i class="bi bi-globe2" style="font-size:1.8rem"></i>
+                                    <span>Website</span>
+                                </a>
+                            </li> --}}
+                            @can('view', \App\Models\Website::class)
+                            @if(
+                                    auth()->user()->is_superuser
+                                    ||
+                                    (auth()->user()->hasAccess('admin') 
+                                        && optional(auth()->user()->department)->id == 3)
+                                )
+                                <li class="{{ Request::is('website') ? 'active' : '' }}">
+                                    <a href="{{ route('website.index') }}">
+                                        <i class="bi bi-globe2" style="font-size:1.8rem"></i>
+                                        <span>Website</span>
+                                    </a>
+                                </li>
+                            @endif
+                            @endcan
 
-                                    @can('create', \App\Models\Asset::class)
-                                        <li{!! (Request::query('Deleted') ? ' class="active"' : '') !!}>
-                                            <a href="{{ url('hardware?status=Deleted') }}">
-                                                {{ trans('general.deleted') }}
-                                            </a>
-                                        </li>
-                                        <li {!! (Request::is('maintenances') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('maintenances.index') }}">
-                                                {{ trans('general.asset_maintenances') }}
-                                            </a>
-                                        </li>
-                                    @endcan
-                                    @can('admin')
-                                        <li id="import-history-sidenav-option" {!! (Request::is('hardware/history') ? ' class="active"' : '') !!}>
-                                            <a href="{{ url('hardware/history') }}">
-                                                {{ trans('general.import-history') }}
-                                            </a>
-                                        </li>
-                                    @endcan
-                                    @can('audit', \App\Models\Asset::class)
-                                        <li id="bulk-audit-sidenav-option" {!! (Request::is('hardware/bulkaudit') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('assets.bulkaudit') }}">
-                                                {{ trans('general.bulkaudit') }}
-                                            </a>
-                                        </li>
-                                    @endcan
-                                </ul>
-                            </li>
-                        @endcan
-                        @can('view', \App\Models\License::class)
-                            <li{!! (Request::is('licenses*') ? ' class="active"' : '') !!}>
-                                <a href="{{ route('licenses.index') }}">
-                                    <x-icon type="licenses" class="fa-fw"/>
-                                    <span>{{ trans('general.licenses') }}</span>
-                                </a>
-                            </li>
-                        @endcan
-                        @can('index', \App\Models\Accessory::class)
-                            <li id="accessories-sidenav-option"{!! (Request::is('accessories*') ? ' class="active"' : '') !!}>
-                                <a href="{{ route('accessories.index') }}">
-                                    <x-icon type="accessories" class="fa-fw" />
-                                    <span>{{ trans('general.accessories') }}</span>
-                                </a>
-                            </li>
-                        @endcan
-                        @can('view', \App\Models\Consumable::class)
-                            <li id="consumables-sidenav-option"{!! (Request::is('consumables*') ? ' class="active"' : '') !!}>
-                                <a href="{{ url('consumables') }}">
-                                    <x-icon type="consumables" class="fa-fw" />
-                                    <span>{{ trans('general.consumables') }}</span>
-                                </a>
-                            </li>
-                        @endcan
-                        @can('view', \App\Models\Component::class)
-                            <li id="components-sidenav-option"{!! (Request::is('components*') ? ' class="active"' : '') !!}>
-                                <a href="{{ route('components.index') }}">
-                                    <x-icon type="components" class="fa-fw" />
-                                    <span>{{ trans('general.components') }}</span>
-                                </a>
-                            </li>
-                        @endcan
-                        @can('view', \App\Models\PredefinedKit::class)
-                            <li id="kits-sidenav-option"{!! (Request::is('kits') ? ' class="active"' : '') !!}>
-                                <a href="{{ route('kits.index') }}">
-                                    <x-icon type="kits" class="fa-fw" />
-                                    <span>{{ trans('general.kits') }}</span>
-                                </a>
-                            </li>
-                        @endcan
+                            @can('view', \App\Models\User::class)
+                            @if(
+                                    auth()->user()->is_superuser
+                                    ||
+                                    (auth()->user()->hasAccess('admin') 
+                                        && optional(auth()->user()->department)->id == 3)
+                                )
+                                <li id="users-sidenav-option"{!! (Request::is('users*') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('users.index') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=6" : ''}}>
+                                        <x-icon type="users" class="fa-fw" style="font-size:1.8rem" />
+                                        <span>{{ trans('general.people') }}</span>
+                                    </a>
+                                </li>
+                            @endif
+                            @endcan
 
-                        @can('view', \App\Models\User::class)
-                            <li id="users-sidenav-option"{!! (Request::is('users*') ? ' class="active"' : '') !!}>
-                                <a href="{{ route('users.index') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=6" : ''}}>
-                                    <x-icon type="users" class="fa-fw" />
-                                    <span>{{ trans('general.people') }}</span>
-                                </a>
-                            </li>
-                        @endcan
-                        @can('import')
-                            <li id="import-sidenav-option"{!! (Request::is('import*') ? ' class="active"' : '') !!}>
-                                <a href="{{ route('imports.index') }}">
-                                    <x-icon type="import" class="fa-fw" />
-                                    <span>{{ trans('general.import') }}</span>
-                                </a>
-                            </li>
-                        @endcan
+                            @can('import')
+                                @if(
+                                    auth()->user()->is_superuser
+                                    ||
+                                    (auth()->user()->hasAccess('admin') 
+                                        && optional(auth()->user()->department)->id == 3)
+                                )
+                                <li id="import-sidenav-option"{!! (Request::is('import*') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('imports.index') }}">
+                                        <x-icon type="import" class="fa-fw" style="font-size:1.8rem"/>
+                                        {{-- <i class="bi bi-cloud-arrow-up-fill" style="font-size""></i> --}}
+                                        <span>{{ trans('general.import') }}</span>
+                                    </a>
+                                </li>
+                                @endif
+                            @endcan
 
-                        @can('backend.interact')
+                        {{-- @can('backend.interact')
                             <li id="settings-sidenav-option" class="treeview {!! in_array(Request::route()->getName(),App\Helpers\Helper::SettingUrls()) ? ' active': '' !!}">
                                 <a href="#" id="settings">
                                     <x-icon type="settings" class="fa-fw" />
                                     <span>{{ trans('general.settings') }}</span>
-                                    <x-icon type="angle-left" class="pull-right fa-fw"/>
+                                    <x-icon type="angle-left" class="pull-right fa-fw" style="font-size:1.8rem"/>
                                 </a>
 
                                 <ul class="treeview-menu">
@@ -744,12 +826,149 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                     @endcan
                                 </ul>
                             </li>
-                        @endcan
+                        @endcan --}}
+                        @php
+                            $user = auth()->user();
+
+                            if (!$user) {
+                                return;
+                            }
+
+                            $isSuper = $user->isSuperUser();
+
+                            $canView = function ($model) use ($user, $isSuper) {
+                                if ($isSuper) {
+                                    return true;
+                                }
+
+                                return Gate::allows('view', $model);
+                            };
+
+                            $showSettingsMenu =
+                                $canView(\App\Models\CustomField::class) ||
+                                $canView(\App\Models\CustomFieldset::class) ||
+                                $canView(\App\Models\Statuslabel::class) ||
+                                $canView(\App\Models\AssetModel::class) ||
+                                $canView(\App\Models\Category::class) ||
+                                $canView(\App\Models\Manufacturer::class) ||
+                                $canView(\App\Models\Supplier::class) ||
+                                $canView(\App\Models\Department::class) ||
+                                $canView(\App\Models\Location::class) ||
+                                $canView(\App\Models\Company::class) ||
+                                $canView(\App\Models\Depreciation::class);
+                        @endphp
+
+
+                        @if($showSettingsMenu)
+                        <li id="settings-sidenav-option"
+                            class="treeview {!! in_array(Request::route()->getName(),App\Helpers\Helper::SettingUrls()) ? ' active': '' !!}">
+
+                            <a href="#" id="settings">
+                                <x-icon type="settings" class="fa-fw" />
+                                <span>{{ trans('general.settings') }}</span>
+                                <x-icon type="angle-left" class="pull-right fa-fw" style="font-size:1.8rem"/>
+                            </a>
+
+                            <ul class="treeview-menu">
+
+                                @if($canView(\App\Models\CustomField::class) || $canView(\App\Models\CustomFieldset::class))
+                                    <li {!! (Request::is('fields*') ? ' class="active"' : '') !!}>
+                                        <a href="{{ route('fields.index') }}">
+                                            {{ trans('admin/custom_fields/general.custom_fields') }}
+                                        </a>
+                                    </li>
+                                @endif
+
+
+                                @if($canView(\App\Models\Statuslabel::class))
+                                    <li {!! (Request::is('statuslabels*') ? ' class="active"' : '') !!}>
+                                        <a href="{{ route('statuslabels.index') }}">
+                                            {{ trans('general.status_labels') }}
+                                        </a>
+                                    </li>
+                                @endif
+
+
+                                @if($canView(\App\Models\AssetModel::class))
+                                    <li {!! (Request::is('models*') ? ' class="active"' : '') !!}>
+                                        <a href="{{ route('models.index') }}">
+                                            {{ trans('general.asset_models') }}
+                                        </a>
+                                    </li>
+                                @endif
+
+
+                                @if($canView(\App\Models\Category::class))
+                                    <li {!! (Request::is('categories*') ? ' class="active"' : '') !!}>
+                                        <a href="{{ route('categories.index') }}">
+                                            {{ trans('general.categories') }}
+                                        </a>
+                                    </li>
+                                @endif
+
+
+                                @if($canView(\App\Models\Manufacturer::class))
+                                    <li {!! (Request::is('manufacturers*') ? ' class="active"' : '') !!}>
+                                        <a href="{{ route('manufacturers.index') }}">
+                                            {{ trans('general.manufacturers') }}
+                                        </a>
+                                    </li>
+                                @endif
+
+
+                                @if($canView(\App\Models\Supplier::class))
+                                    <li {!! (Request::is('suppliers*') ? ' class="active"' : '') !!}>
+                                        <a href="{{ route('suppliers.index') }}">
+                                            {{ trans('general.suppliers') }}
+                                        </a>
+                                    </li>
+                                @endif
+
+
+                                @if($canView(\App\Models\Department::class))
+                                    <li {!! (Request::is('departments*') ? ' class="active"' : '') !!}>
+                                        <a href="{{ route('departments.index') }}">
+                                            {{ trans('general.departments') }}
+                                        </a>
+                                    </li>
+                                @endif
+
+
+                                @if($canView(\App\Models\Location::class))
+                                    <li {!! (Request::is('locations*') ? ' class="active"' : '') !!}>
+                                        <a href="{{ route('locations.index') }}">
+                                            {{ trans('general.locations') }}
+                                        </a>
+                                    </li>
+                                @endif
+
+
+                                @if($canView(\App\Models\Company::class))
+                                    <li {!! (Request::is('companies*') ? ' class="active"' : '') !!}>
+                                        <a href="{{ route('companies.index') }}">
+                                            {{ trans('general.companies') }}
+                                        </a>
+                                    </li>
+                                @endif
+
+
+                                @if($canView(\App\Models\Depreciation::class))
+                                    <li {!! (Request::is('depreciations*') ? ' class="active"' : '') !!}>
+                                        <a href="{{ route('depreciations.index') }}">
+                                            {{ trans('general.depreciation') }}
+                                        </a>
+                                    </li>
+                                @endif
+
+                            </ul>
+                        </li>
+                        @endif
+
 
                         @can('reports.view')
                             <li class="treeview{{ (Request::is('reports*') ? ' active' : '') }}">
                                 <a href="#" class="dropdown-toggle">
-                                    <x-icon type="reports" class="fa-fw" />
+                                    <x-icon type="reports" class="bi bi-bar-chart-steps" style="font-size:1.8rem" />
                                     <span>{{ trans('general.reports') }}</span>
                                     <x-icon type="angle-left" class="pull-right"/>
                                 </a>
@@ -793,19 +1012,95 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         <a href="{{ url('reports/accessories') }}">
                                             {{ trans('general.accessory_report') }}
                                         </a>
+					                <li  {{!! (Request::is('reports/detail') ? ' class="active"' : '') !!}}>
+                                        <a href="{{ url('reports/detail') }}">
+                                            {{ trans('general.detail_report') }}
+                                        </a>
                                     </li>
+                                    {{-- <li class="treeview">
+                                    <a href="#">
+                                        <i class="fa fa-bar-chart"></i> <span>Reports</span>
+                                        <i class="fa fa-angle-left pull-right"></i>
+                                    </a>
+                                    <ul class="treeview-menu">
+                                        <li><a href="{{ route('reports.consumables') }}"><i class="fa fa-circle-o"></i> Consumable Report</a></li>
+                                        
+                                    </ul>
+                                </li> --}}
+                          {{-- <li {!! (Request::is('reports/consumables*') ? ' class="active"' : '') !!}>
+                            <a href="{{ route('reports.consumables.index') }}">
+                                <span>Reports Consumable</span>
+                            </a>
+                            </li> --}}
+                                {{-- @can('reports.consumables_view')
+                                <li {!! (Request::is('reports/consumables*') ? 'class="active"' : '') !!}>
+                                    <a href="{{ route('reports.consumables.index') }}">
+                                        <span>Reports Consumable</span>
+                                    </a>
+                                </li>
+                                @endcan --}}
+
                                 </ul>
                             </li>
                         @endcan
 
+                        @if(Auth::user()->hasAccess('reports_consumable.view'))
+                        <li class="treeview{{ Request::is('reports/consumables*') ? ' active' : '' }}">
+                            <a href="#">
+                                <i class="fa fa-cubes"></i>
+                                <span>Reports Consumable</span>
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li class="{{ Request::is('reports/consumables') ? 'active' : '' }}">
+                                    <a href="{{ route('reports.consumables.index') }}">
+                                        Consumable Usage
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        @endif
                         @can('viewRequestable', \App\Models\Asset::class)
+                        @if(
+                                    auth()->user()->is_superuser
+                                    ||
+                                    (auth()->user()->hasAccess('admin') 
+                                        && optional(auth()->user()->department)->id == 3)
+                                )
                             <li{!! (Request::is('account/requestable-assets') ? ' class="active"' : '') !!}>
                                 <a href="{{ route('requestable-assets') }}">
-                                    <x-icon type="requestable" class="fa-fw" />
+                                    <x-icon type="requestable" class="fa-fw" style="font-size:1.8rem" />
                                     <span>{{ trans('general.requestable_items') }}</span>
                                 </a>
                             </li>
+                        @endif
                         @endcan
+                    
+                            {{-- <li class="treeview">
+                                    <a href="#">
+                                        <i class="bi bi-basket" style="font-size:1.8rem"></i> <span>Consumable Orders</span>
+                                        <i class="fa fa-angle-left pull-right"></i>
+                                    </a>
+                                    <ul class="treeview-menu">
+                                        <li class="{{ Request::is('consumables/orders*') ? 'active' : '' }}">
+                                        <a href="{{ route('consumable.orders.index') }}">
+                                            <span>Request Consumable</span>
+                                        </a>
+                                    </li>
+                                                        
+                                    </ul>
+                                </li> --}}
+                    <li class="{{ Request::is('consumables/orders*') ? 'active' : '' }}">
+                        <a href="{{ route('consumable.orders.index') }}">
+                            <i class="bi bi-basket" style="font-size:1.8rem"></i> <span>Consumable Orders</span>
+                        </a>
+                    </li>
+
+                    {{-- <li class="{{ Request::is('consumables/stock*') ? 'active' : '' }}">
+                        <a href="{{ route('consumable.stock.index') }}">
+                            <i class="bi bi-basket" style="font-size:1.8rem"></i> <span>Consumable Stock</span>
+                        </a>
+                    </li> --}}
 
 
                     </ul>
@@ -920,25 +1215,15 @@ dir="{{ Helper::determineLanguageDirection() }}">
             </div><!-- /.content-wrapper -->
             <footer class="main-footer hidden-print" style="display:grid;flex-direction:column;">
 
-                <div class="1hidden-xs pull-left">
+                {{--<div class="1hidden-xs pull-left">
                     <div class="pull-left">
                          {!! trans('general.footer_credit') !!}
-                    </div>
-                    <div class="pull-right">
+                    </div> --}}
+                {{--    <div class="pull-right">
                     @if ($snipeSettings->version_footer!='off')
                         @if (($snipeSettings->version_footer=='on') || (($snipeSettings->version_footer=='admin') && (Auth::user()->isSuperUser()=='1')))
                             &nbsp; <strong>{{ trans('general.version') }}</strong> {{ config('version.app_version') }} -
                             {{ trans('general.build') }} {{ config('version.build_version') }} ({{ config('version.branch') }})
-                        @endif
-                    @endif
-
-                    @if ($snipeSettings->support_footer!='off')
-                        @if (($snipeSettings->support_footer=='on') || (($snipeSettings->support_footer=='admin') && (Auth::user()->isSuperUser()=='1')))
-                            <a target="_blank" class="btn btn-default btn-xs"
-                               href="https://snipe-it.readme.io/docs/overview"
-                               rel="noopener">{{ trans('general.user_manual') }}</a>
-                            <a target="_blank" class="btn btn-default btn-xs" href="https://snipeitapp.com/support/"
-                               rel="noopener">{{ trans('general.bug_report') }}</a>
                         @endif
                     @endif
 
@@ -947,13 +1232,25 @@ dir="{{ Helper::determineLanguageDirection() }}">
                            href="{{  $snipeSettings->privacy_policy_link }}"
                            target="_new">{{ trans('admin/settings/general.privacy_policy') }}</a>
                     @endif
-                    </div>
+		@if ($snipeSettings->support_footer!='off')
+                        @if (($snipeSettings->support_footer=='on') || (($snipeSettings->support_footer=='admin') && (Auth::user()->isSuperUser()=='1')))
+                            <a target="_blank" class="btn btn-default btn-xs"
+                               href="https://snipe-it.readme.io/docs/overview"
+                               rel="noopener">{{ trans('general.user_manual') }}</a>
+                            <a target="_blank" class="btn btn-default btn-xs" href="https://snipeitapp.com/support/"
+                               rel="noopener">{{ trans('general.bug_report') }}</a>
+                        @endif
+                    @endif 
+
+                    </div> --}}
                     <br>
+		<b>
                     @if ($snipeSettings->footer_text!='')
-                        <div class="pull-left">
+                        <div class="text-center">
                             {!!  Helper::parseEscapedMarkedown($snipeSettings->footer_text)  !!}
                         </div>
                     @endif
+		</b>
                 </div>
             </footer>
         </div><!-- ./wrapper -->
@@ -974,7 +1271,7 @@ dir="{{ Helper::determineLanguageDirection() }}">
                         <form method="post" id="deleteForm" role="form">
                             {{ csrf_field() }}
                             {{ method_field('DELETE') }}
-
+	
                             <button type="button" class="btn btn-default pull-left"
                                     data-dismiss="modal">{{ trans('general.cancel') }}</button>
                             <button type="submit" class="btn btn-outline"
